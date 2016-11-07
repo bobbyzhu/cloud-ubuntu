@@ -1,0 +1,9 @@
+# build
+
+TOP_DIR=$(cd $(dirname $0) && pwd)
+IMAGE_NAME=$(< ${TOP_DIR}/name)
+CONTAINER_NAME=$(basename $IMAGE_NAME)
+
+[ -n "$CACHE" -a "$CACHE" == "0"  ] && NO_CACHE="--no-cache"
+
+sudo docker build $CACHE_FLAG -t $IMAGE_NAME ${TOP_DIR}
