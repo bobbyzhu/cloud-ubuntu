@@ -108,12 +108,16 @@ next_iteration = function () {
 
     frame_idx = 0;
 
+    if ((skipframes > 0) && (mode === 'realtime'))
+        mode = 'fullspeed';
+
+    console.info("play mode is " + mode);
+
     //console.info("Start frame_idx " + frame_idx);
     istart_time = (new Date()).getTime();
     rfb.connect('test', 0, "bogus");
 
     queue_next_packet();
-
 };
 
 end_iteration = function () {
@@ -132,6 +136,9 @@ end_iteration = function () {
 
 queue_next_packet = function () {
     var frame, foffset, toffset;
+
+    updatestats(iteration, frame_idx);
+
     if (test_state !== 'running') { return; }
 
     frame = VNC_frame_data[frame_idx];
@@ -152,6 +159,23 @@ queue_next_packet = function () {
         return;
     }
 
+    if ((frame_idx < skipframes) && (mode === 'realtime'))
+        mode = 'fullspeed';
+
+    if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
+        mode = 'realtime';
+
+        if (rfb._display.pending())
+            rfb._display.flush();
+
+        rfb._display.set_onFlush(function () {
+            if (rfb._flushing) {
+                rfb._onFlush();
+            }
+        });
+    }
+
+    console.info("play mode is " + mode);
     //console.info("play_stats is " + play_stats);
 
     if (mode === 'realtime') {

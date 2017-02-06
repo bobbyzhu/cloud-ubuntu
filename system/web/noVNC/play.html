@@ -5,29 +5,27 @@
     </head>
     <body>
 
+        <div id="VNC_control">
+	    <input id='startButton' type='button' value='Start' style='min-width:50px'
+		    onclick="start();" disabled>
+            &nbsp; Session:<span id="session" style="color: #f00;"></span>:<span id="iteration" style="color: #33f;"></span>:<span id="frame_idx" style="color: #00f;"></span>
+            &nbsp; Iterations:<input id='iterations' style="width:25px; text-align: center">
+            &nbsp; skipFrames:<input id='skipframes' style="width:25px; text-align: center">
+            &nbsp; Fullspeed:<input type='radio' id='mode1' name='mode'>
+            &nbsp; Realtime:<input type='radio' id='mode2' name='mode' checked><br>
+            <textarea id="messages" style="font-size: 9; margin-top: 10px; display: none;" cols=80 rows=5></textarea><br>
+        </div>
+
         <div id="VNC_screen">
             <canvas id="VNC_canvas" width="480px" height="20px">
                 Canvas not supported.
             </canvas>
             <div id="VNC_status_bar" class="VNC_status_bar" style="margin-top: 0px">
                 <table border=0 width=100%><tr>
-                    <td><div id="VNC_status" style="text-align: center; display: none;">Loading</div></td>
+                    <td><div id="VNC_status" style="text-align: center">Loading</div></td>
                 </tr></table>
             </div>
         </div>
-
-        <div id="VNC_control" style="position: absolute; float: right; right: 45%; top: 10px">
-	    <input id='startButton' type='button' value='Start' style='min-width:100px'
-		    onclick="start();" disabled>
-	    <div id="loop" style="display: none;"><br> Iterations: <input id='iterations' style="width:50px; text-align: center"></div>
-        </div>
-
-        <div id="VNC_others" style="display: none;">
-            <textarea id="messages" style="font-size: 9; display: none;" cols=80 rows=2></textarea><br>
-            <!-- Perftest:--> <input type='radio' id='mode1' name='mode' style="display: none">&nbsp;
-            <!-- Realtime:--> <input type='radio' id='mode2' name='mode' style="display: none" checked>
-        </div>
-
     </body>
 
     <!--
@@ -61,9 +59,15 @@
             cell.scrollTop = cell.scrollHeight;
         }
 
+        function updatestats(iteration, frame_idx) {
+	    document.getElementById('iteration').textContent = iteration;
+	    document.getElementById('frame_idx').textContent = frame_idx;
+        }
+
         fname = WebUtil.getQueryVar('data', null);
         if (fname) {
             message("Loading " + fname);
+	    document.getElementById('session').textContent = fname;
             document.getElementById('startButton').value = 'Loading "' + fname + '"';
             // Load supporting scripts
             WebUtil.load_scripts({
@@ -92,23 +96,14 @@
 
         function __start() {
             play_stats = playStats.RUNNING;
-
-            document.getElementById('VNC_control').style.right='0.2em';
-            document.getElementById('loop').style.display = 'none';
-            document.getElementById('startButton').value = 'Stop running "' + fname + '"';
-            // document.getElementById('startButton').disabled = true;
-
-            iterations = document.getElementById('iterations').value;
             iteration = 0;
-            start_time = (new Date()).getTime();
 
-            if (document.getElementById('mode1').checked) {
-                message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
-                mode = 'perftest';
-            } else {
-                message("Starting realtime playback [" + iterations + " iteration(s)]");
-                mode = 'realtime';
-            }
+            document.getElementById('startButton').value = 'Stop';
+
+            start_time = (new Date()).getTime();
+ 
+            document.getElementById('VNC_status').textContent = "Running";
+            message("Start play the " + skipframes + " Frame");
 
             //recv_message = rfb.testMode(send_array, VNC_frame_encoding);
 
@@ -117,22 +112,38 @@
 
 	function __stop() {
 	    play_stats = playStats.STOPPED;
-	    document.getElementById('startButton').value = 'Continue play "' + fname + '"';
+	    document.getElementById('startButton').value = 'Continue';
             document.getElementById('startButton').disabled = false;
+	    document.getElementById('VNC_status').textContent = "Stopped";
 	    message("Stopped at the " + frame_idx + "frame!");
 	}
 
 	function __continue() {
-            document.getElementById('startButton').value = 'Stop running "' + fname + '"';
+            document.getElementById('startButton').value = 'Stop';
+	    document.getElementById('VNC_status').textContent = "Continued";
 
-	    if (mode === 'perftest') {window.setImmediate(do_packet); }
+	    if (mode === 'fullspeed') { window.setImmediate(do_packet); }
 	    else { setTimeout(do_packet, delay); }
 
+	    if ((frame_idx < skipframes) && (mode === 'realtime'))
+	        mode = 'fullspeed';
+
 	    play_stats = playStats.RUNNING;
-	    message("Continue play the" + frame_idx + "frame!");
+	    message("Continue play the " + frame_idx + " frame!");
 	}
 
 	function start() {
+            skipframes = document.getElementById('skipframes').value;
+            iterations = document.getElementById('iterations').value;
+
+            if (document.getElementById('mode1').checked || (skipframes > frame_idx)) {
+                message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
+                mode = 'fullspeed';
+            } else {
+                message("Starting realtime playback [" + iterations + " iteration(s)]");
+                mode = 'realtime';
+            }
+
             //console.info("play stats is " + play_stats);
 	    if (play_stats != playStats.RUNNING) {
 		if (play_stats === playStats.STOPPED)
@@ -157,28 +168,33 @@
             rfb.get_keyboard().ungrab();
             play_stats = playStats.INIT;
 
-            document.getElementById('VNC_control').style.right='45%';
             document.getElementById('startButton').disabled = false;
             document.getElementById('startButton').value = "Start";
-
-            document.getElementById('loop').style.display = 'block';
-            document.getElementById('startButton').value = 'Start "' + fname + '"';
+            document.getElementById('VNC_status').textContent = "Finished";
         }
 
         window.onscriptsload = function () {
             iterations = WebUtil.getQueryVar('iterations', 1);
+            skipframes = WebUtil.getQueryVar('skipframes', 0);
+            messageon = WebUtil.getQueryVar('message', 0);
+
             document.getElementById('iterations').value = iterations;
+            document.getElementById('skipframes').value = skipframes;
             mode = WebUtil.getQueryVar('mode', 3);
-            if (mode === 'perftest') {
+            if (mode === 'fullspeed') {
                 document.getElementById('mode1').checked = true;
             } else {
                 document.getElementById('mode2').checked = true;
+            }
+            if (messageon) {
+                document.getElementById('messages').style.display = 'block';
             }
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
             }
             // Play immediately after load the data
             document.getElementById('startButton').disabled = false;
+            document.getElementById('VNC_status').textContent = "Loaded";
 
             start();
         }
