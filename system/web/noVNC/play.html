@@ -23,7 +23,7 @@
 
         <div id="VNC_control">
 	    <input id='startButton' type='button' value='Start' onclick="start();" disabled>
-	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" onmousedown='track_stop();' onmousemove='track_move();' onmouseup='track_start();' />
+	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
 	    &nbsp; <a>Session: </a><span id="session"></span><a>:</a><span id="iteration"></span><a>:</a><span id="frame_idx"></span>
 	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
