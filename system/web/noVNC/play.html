@@ -31,7 +31,7 @@
         <div id="VNC_control">
 	    <div><a href="#VNC_canvas" title="Goto the session video"><span id="session"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span></div><br>
 
-	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
+	    <input id='startButton' type='button' value='=>' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
 	    <input id="beginButton" type='button' value='<<' onclick="track_click('begin');" title="Ctrl/Shift/Alt + Up, Goto the Begin">
 	    <input id="minusButton" type='button' value='<' onclick="track_click('minus');" title="Ctrl/Shift/Alt + Left, Backfoward frames">
@@ -196,7 +196,7 @@
 	function __stop() {
 	    play_stats = playStats.STOPPED;
 
-	    start_btn.value = '▷';
+	    start_btn.value = '=>';
 	    vnc_status.textContent = "Stopped";
 	    message("Stopped at the " + frame_idx + " frame!");
 	}
