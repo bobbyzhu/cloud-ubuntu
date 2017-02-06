@@ -8,7 +8,7 @@ RUN apt-get -y update
 
 # Web SSH
 RUN apt-get install -y --force-yes --no-install-recommends python-pip dtach \
-	openssh-client \
+	openssh-client telnet \
     && pip install gateone \
     && mkdir -p /etc/gateone/ssl/ \
     && apt-get autoclean -y \
