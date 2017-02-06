@@ -91,7 +91,7 @@
 	var track_bar_stats = trackBarStats.INIT;
 	var prev_track_value;
 
-        var fname, start_time, play_stats, frame_idx_max, skipframes, messageon;
+        var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon;
 	var track_bar = document.getElementById('trackBar');
 	var cell = document.getElementById('messages');
 	var iter = document.getElementById('iteration');
@@ -113,6 +113,7 @@
         play_stats = playStats.INIT;
 	prev_track_value = 0;
 	frame_idx_max = 0;
+	totalframes = 0;
 
 	function iters_update() {
 	    iterations = Number(iters.value);
@@ -129,8 +130,12 @@
 
         function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
-	    if (fname)
-		fidx.textContent = (frame_idx + 1) + " . " + parseInt((frame_idx + 1) *100/(frame_idx_max + 1)) + "%";
+	    if (fname) {
+		var tmp = frame_idx + 1;
+		if (frame_idx > frame_idx_max)
+		    tmp = totalframes;
+		fidx.textContent = tmp + " . " + parseInt(tmp * 100 / totalframes) + "%";
+	    }
 
 	    if ((frame_idx > skipframes) && ___running())
 		track_bar.value = frame_idx;
@@ -283,7 +288,10 @@
 	    if ((track_bar_stats === trackBarStats.DOWN) || (track_bar_stats === trackBarStats.MOVE)) {
 		if (!___running()) {
 	            skipframes = Number(track_bar.value) + 1;
-	            jumpto.textContent = Number(skipframes) + 1;
+		    if (skipframes > frame_idx_max)
+	                jumpto.textContent = totalframes;
+		    else
+	                jumpto.textContent = Number(skipframes) + 1;
 		}
 	        track_bar_stats = trackBarStats.MOVE;
 	    }
@@ -466,6 +474,7 @@
 
                 track_bar.max = frame_idx_max;
 		prev_track_value = frame_idx_max;
+		totalframes = VNC_frame_data.length;
 	        size.textContent = VNC_frame_data.length;
 
                 track_bar.style.display = "inline-block";
