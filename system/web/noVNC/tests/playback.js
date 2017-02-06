@@ -224,6 +224,8 @@ do_packet = function () {
         }
     }
     bytes_processed += u8.length;
+    rfb._display.autoscale(800, 600, 1);
+    //rfb._display.set_scale(0.6);
     rfb._sock._recv_message({'data' : u8});
     frame_idx += 1;
 
