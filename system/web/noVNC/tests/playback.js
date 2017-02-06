@@ -111,7 +111,7 @@ next_iteration = function () {
     if ((skipframes > 0) && (mode === 'realtime'))
         mode = 'fullspeed';
 
-    console.info("play mode is " + mode);
+    //console.info("play mode is " + mode);
 
     //console.info("Start frame_idx " + frame_idx);
     istart_time = (new Date()).getTime();
@@ -175,7 +175,7 @@ queue_next_packet = function () {
 	}
     }
 
-    console.info("play mode is " + mode);
+    //console.info("play mode is " + mode);
     //console.info("play_stats is " + play_stats);
 
     if (mode === 'realtime') {
