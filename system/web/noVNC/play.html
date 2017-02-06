@@ -34,7 +34,7 @@
 	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
 	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up, Goto the Begin">
-	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left, Backfoward 10 frames">
+	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left, Backfoward frames">
 
 	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
@@ -89,6 +89,7 @@
 	    UP: 3,
 	}
 	var track_bar_stats = trackBarStats.INIT;
+	var prev_track_value;
 
         var fname, start_time, play_stats, skipframes, messageon;
 	var track_bar = document.getElementById('trackBar');
@@ -110,6 +111,7 @@
 	var mode2 = document.getElementById('mode2');
 
         play_stats = playStats.INIT;
+	prev_track_value = track_bar.max;
 
         function message(str) {
 	    if (messageon) {
@@ -323,19 +325,43 @@
 		    end_btn.disabled = true;
 		    break;
 		case 'minus':
-		    var tmp = track_bar.value - 10;
+		    var tmp = track_bar.value;
+		    if (tmp > 2500)
+		        tmp = parseInt(tmp / 2);
+		    else if (tmp > 1500)
+		        tmp = parseInt(tmp / 3);
+		    else if (tmp > 1000)
+		        tmp = tmp - 500;
+		    else if (tmp > 500)
+		        tmp = tmp - 200;
+		    else if (tmp > 100)
+		        tmp = tmp - 100;
+		    else if (tmp > 50)
+		        tmp = tmp - 50;
+		    else if (tmp > 20)
+		        tmp = tmp - 20;
+		    else
+		        tmp = tmp - 10;
+
+		    while (prev_track_value <= tmp)
+			tmp = tmp - 10;
 		    if (tmp > 0)
-			track_bar.value = tmp;
+		        track_bar.value = tmp;
+		    else
+			return;
 		    minus_btn.disabled = true;
 		    break;
 		case 'plus':
 		    var tmp = Number(track_bar.value) + 10;
 		    if (tmp < track_bar.max)
 			track_bar.value = tmp;
+		    else
+			return;
 		    plus_btn.disabled = true;
 		    break;
 	    }
-	    //console.info("track_bar.value = " + track_bar.value);
+	    //console.info("track_bar.value = " + track_bar.value + "prev_track_value = " + prev_track_value);
+	    prev_track_value = track_bar.value;
 	    //sleep(300);
 	    track_start();
 	}
@@ -399,6 +425,7 @@
 
 	    skipframes = 0;
 	    jumpto.textContent = 0;
+	    prev_track_value = track_bar.max;
 
 	    __resume();
 	}
@@ -425,6 +452,7 @@
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
                 track_bar.max = VNC_frame_data.length;
+		prev_track_value = track_bar.max;
 	        size.textContent = track_bar.max;
                 track_bar.style.display = "inline-block";
 
