@@ -33,13 +33,13 @@
 
 	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
-	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up, Goto the Begin">
-	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left, Backfoward frames">
+	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl/Shift/Alt + Up, Goto the Begin">
+	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl/Shift/Alt + Left, Backfoward frames">
 
 	    <input id="trackBar" type="range" min="0" max="10" step="1" value="0" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
-	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right, Fastforward 10 frames">
-	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down, Goto the End"><br>
+	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl/Shift/Alt + Right, Fastforward 10 frames">
+	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl/Shift/Alt + Down, Goto the End"><br>
 
 	    <div id='buttons' style="display: none;"><br>
 	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
@@ -390,7 +390,7 @@
 	    if (!start_btn.disabled && e.keyCode === 13)
 		start();
 
-	    if (!e.ctrlKey)
+	    if (!e.ctrlKey && !e.shiftKey && !e.altKey)
 		return;
 
 	    e = window.event || e;
