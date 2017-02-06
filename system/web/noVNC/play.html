@@ -163,7 +163,10 @@
 	    vnc_status.textContent = "Continued";
 
 	    if (mode === 'fullspeed') { window.setImmediate(do_packet); }
-	    else { setTimeout(do_packet, delay); }
+	    else {
+		setTimeout(do_packet, delay);
+	        istart_time = (new Date()).getTime() - toffset;
+	    }
 
 	    if ((frame_idx < skipframes) && (mode === 'realtime'))
 	        mode = 'fullspeed';

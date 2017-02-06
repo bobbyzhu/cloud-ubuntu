@@ -10,7 +10,7 @@
 
 
 var rfb, mode, test_state, frame_idx, frame_length,
-    iteration, iterations, istart_time, encoding, delay,
+    iteration, iterations, istart_time, encoding, toffset, delay,
 
     // Pre-declarations for jslint
     send_array, next_iteration, end_iteration, queue_next_packet,
@@ -139,7 +139,7 @@ end_iteration = function () {
 };
 
 queue_next_packet = function () {
-    var frame, foffset, toffset;
+    var frame, foffset;
 
     updatestats(iteration, frame_idx);
 
