@@ -23,7 +23,7 @@
 	<h1><a href="http://tinylab.org" target="_blank" title="Based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
 
         <div id="VNC_control">
-	    <div><a href="#VNC_canvas" title="Goto the video"><span id="session"></span></a><a> : </a><span id="iteration"></span><a> : </a><span id="size"></span><a> : </a><span id="skipframes"></span><a> : </a><span id="frame_idx"></span></div><br>
+	    <div><a href="#VNC_canvas" title="Goto the video"><span id="session"></span></a>&nbsp;&nbsp;<span id="loop" title="total iterations"></span><a> . </a><span id="iteration" title="current iteration"></span><a> . </a><span id="size" title="total frames"></span><a> . </a><span id="skipframes" title="frames to skip"></span><a> . </a><span id="frame_idx" title="current frame and percentage"></span></div><br>
 
 	    <input id='startButton' type='button' value='Start' onclick="start();" disabled>
 	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' /><br>
@@ -87,6 +87,7 @@
 	var start_btn = document.getElementById('startButton');
 	var jumpto = document.getElementById('skipframes');
 	var size = document.getElementById('size');
+	var loop = document.getElementById('loop');
 	var iters = document.getElementById('iterations');
 	var mode1 = document.getElementById('mode1');
 	var mode2 = document.getElementById('mode2');
@@ -104,7 +105,7 @@
         function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
 	    if (fname)
-		fidx.textContent = (frame_idx+1) + " : " + parseInt((frame_idx + 1)*100/VNC_frame_data.length) + "%";
+		fidx.textContent = (frame_idx+1) + " . " + parseInt((frame_idx + 1)*100/VNC_frame_data.length) + "%";
 
 	    if ((frame_idx > skipframes) && ___playing())
 		trackbar.value = frame_idx + 1;
@@ -297,6 +298,7 @@
 
             iters.value = iterations;
             jumpto.textContent = skipframes;
+	    loop.textContent = iterations;
             mode = WebUtil.getQueryVar('mode', 3);
 
             if (mode === 'fullspeed') {
