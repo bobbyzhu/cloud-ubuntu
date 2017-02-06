@@ -167,11 +167,15 @@ queue_next_packet = function () {
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
         mode = 'realtime';
 
-        if (rfb._flushing) {
-            rfb._display.set_onFlush(function () {
-                if (rfb._flushing)
-                    rfb._onFlush();
-            });
+	foffset = frame.slice(1, frame.indexOf('{', 1));
+	toffset = foffset - 2000;
+	istart_time = (new Date()).getTime() - toffset;
+
+	if (rfb._flushing) {
+	    rfb._display.set_onFlush(function () {
+		if (rfb._flushing)
+		    rfb._onFlush();
+	    });
 	}
     }
 
