@@ -14,13 +14,15 @@
 
         <br>
 
+<!--
         Results:<br>
-        <textarea id="messages" style="font-size: 9;" cols=80 rows=2></textarea>
+-->
+        <textarea id="messages" style="font-size: 9; display: none;" cols=80 rows=2></textarea>
 
         <br>
 
         <div id="VNC_screen">
-            <div id="VNC_status_bar" class="VNC_status_bar" style="margin-top: 0px;">
+            <div id="VNC_status_bar" class="VNC_status_bar" style="margin-top: 0px; display: none;">
                 <table border=0 width=100%><tr>
                     <td><div id="VNC_status">Loading</div></td>
                 </tr></table>
@@ -117,7 +119,7 @@
         }
 
         window.onscriptsload = function () {
-            iterations = WebUtil.getQueryVar('iterations', 3);
+            iterations = WebUtil.getQueryVar('iterations', 1);
             document.getElementById('iterations').value = iterations;
             mode = WebUtil.getQueryVar('mode', 3);
             if (mode === 'perftest') {
