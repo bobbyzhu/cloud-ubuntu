@@ -11,13 +11,16 @@
 	    div a { text-decoration: none; outline: none; }
 	    h1 a { text-decoration: none; outline: none; color:#000 }
 
-	    #minusButton,#plusButton,#beginButton,#endButton { font-size: 100%; color:#aaa; display: none }
+	    #minusButton,#plusButton,#beginButton,#endButton {
+		font-size: 100%; font-weight: 900;
+		color: #aaa; display: none; margin-left: 5px; margin-right: 5px;
+	    }
 
 	    #session { font-size: 115%; vertical-align: top }
 	    #iterations { width:30px; }
 
-	    #startButton { width:100px; margin-right: 10px; }
-	    #trackBar { width: 450px; display:none; }
+	    #startButton { width:100px; margin-right: 5px; display: none; }
+	    #trackBar { width: 450px; display:none; margin-left: 5px; margin-right: 5px; }
 	    #messages { font-size:9; margin: 0 auto; display:none }
 	</style>
     </head>
@@ -31,9 +34,9 @@
 	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter" disabled>
 
 	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up">
-	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left">&nbsp;
+	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left">
 
-	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />&nbsp;
+	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
 	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right">
 	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down"><br>
@@ -163,7 +166,7 @@
         }
 
         function __start() {
-	    start_btn.value = "Ⅱ";
+	    start_btn.value = "||";
 	    vnc_status.textContent = "Running";
             message("Start play the " + skipframes + " Frame");
 
@@ -185,6 +188,10 @@
 
 	function ___stop() {
 	    __stop();
+	    __resume();
+	}
+
+	function __resume() {
 	    start_btn.disabled = false;
 	    begin_btn.disabled = false;
 	    end_btn.disabled = false;
@@ -194,7 +201,7 @@
 	}
 
 	function __continue() {
-	    start_btn.value = "Ⅱ";
+	    start_btn.value = "||";
 	    vnc_status.textContent = "Continued";
 
 	    if (mode === 'fullspeed') {
@@ -276,6 +283,10 @@
 	    }
 	}
 
+	function sleep(ms) {
+	    return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
 	function track_start() {
 	    if (track_bar.disabled)
 		return;
@@ -289,6 +300,7 @@
 	    //console.info("jumpto.value is " + jumpto.textContent + " track_bar.value is " + track_bar.value);
 	    if (frame_idx > track_bar.value)
 		finish();
+	    //sleep(200);
 	    start();
 	}
 
@@ -300,6 +312,7 @@
 	    jumpto.textContent = 0;
 
 	    track_stop();
+
 	    switch(button) {
 		case 'begin':
 		    track_bar.value = 2;
@@ -323,6 +336,7 @@
 		    break;
 	    }
 	    //console.info("track_bar.value = " + track_bar.value);
+	    //sleep(300);
 	    track_start();
 	}
 
@@ -381,17 +395,12 @@
 
 	    //console.info("mode is " + mode + " skipframes is " + skipframes + " frame_idx is " + frame_idx);
 
-	    start_btn.disabled = false;
-	    track_bar.disabled = false;
-	    begin_btn.disabled = false;
-	    end_btn.disabled = false;
-	    plus_btn.disabled = false;
-	    minus_btn.disabled = false;
+	    finish();
 
 	    skipframes = 0;
 	    jumpto.textContent = 0;
 
-	    finish();
+	    __resume();
 	}
 
         window.onscriptsload = function () {
@@ -419,6 +428,7 @@
 	        size.textContent = track_bar.max;
                 track_bar.style.display = "inline-block";
 
+	        start_btn.style.display = 'inline-block';
 	        begin_btn.style.display = 'inline-block';
 	        end_btn.style.display = 'inline-block';
 	        plus_btn.style.display = 'inline-block';
