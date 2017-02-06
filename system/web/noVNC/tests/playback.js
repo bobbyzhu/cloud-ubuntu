@@ -174,7 +174,7 @@ queue_next_packet = function () {
 	trackBar.disabled = false;
 
 	foffset = frame.slice(1, frame.indexOf('{', 1));
-	toffset = foffset - 1000;
+	toffset = foffset - 100;
 	istart_time = (new Date()).getTime() - toffset;
 
 	if (rfb._flushing) {
