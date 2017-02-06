@@ -28,7 +28,7 @@ if [ $VNC_RECORD -eq 1 ]; then
     VNC_RECORD_DIR=/noVNC/recordings
     VNC_RECORD_FILE=$VNC_RECORD_DIR/vnc.record.data
     LOCAL_RECORD_DIR=$TOP_DIR/$VNC_RECORD_DIR
-    [ ! -d $LOCAL_RECORD_DIR ] && mkdir $LOCAL_RECORD_DIR
+    [ ! -d $LOCAL_RECORD_DIR ] && mkdir -p $LOCAL_RECORD_DIR
     VOLUME_MAP=" -v $LOCAL_RECORD_DIR:$VNC_RECORD_DIR "
     echo "LOG: VNC screen recorded in $VNC_RECORD_FILE"
 fi
