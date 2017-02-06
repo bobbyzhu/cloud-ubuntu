@@ -125,7 +125,20 @@ Traffic Legend:
 
         token = args['token'][0].rstrip('\n')
 
-        result_pair = target_plugin.lookup(token)
+        self.log_message("token is %s", token)
+
+        if token.find('vnc:') == 0:
+            result_pair = token.replace('vnc://','').replace('vnc:', '').split(':')
+            if len(result_pair) == 1:
+                if len(result_pair[0]) == 0:
+                    result_pair = "localhost"
+                result_pair = result_pair[0], "5900"
+        elif token == 'default':
+            result_pair = "localhost", "5900"
+        else:
+            result_pair = target_plugin.lookup(token)
+
+        self.log_message("result_pair is %s:%s", result_pair[0], result_pair[1])
 
         if result_pair is not None:
             return result_pair
