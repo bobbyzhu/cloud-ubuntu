@@ -92,6 +92,7 @@
 	var prev_track_value;
 
         var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon;
+	var screen_width, screen_height, screen_ratio;
 	var track_bar = document.getElementById('trackBar');
 	var cell = document.getElementById('messages');
 	var iter = document.getElementById('iteration');
@@ -454,6 +455,14 @@
             iterations = WebUtil.getQueryVar('iterations', 1);
             skipframes = WebUtil.getQueryVar('skipframes', 0);
             messageon = WebUtil.getQueryVar('message', 0);
+
+	    screen_width = WebUtil.getQueryVar('width', 0);
+	    screen_height = WebUtil.getQueryVar('height', 0);
+	    screen_ratio = WebUtil.getQueryVar('ratio', Math.round(4/3));
+	    if (screen_width > 0 && screen_height === 0)
+		screen_height = Math.round(screen_width / screen_ratio);
+	    if (screen_height > 0 && screen_width === 0)
+		screen_width = Math.round(screen_height * screen_ratio);
 
             iters.value = iterations;
             jumpto.textContent = skipframes;
