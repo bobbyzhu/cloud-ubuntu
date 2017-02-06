@@ -8,7 +8,7 @@
         <div id="VNC_control">
 	    <input id='startButton' type='button' value='Start' style='min-width:50px'
 		    onclick="start();" disabled>
-            <input type="range" id="trackBar" min="1" max="10" step="1" value="1" style="display: none;vertical-align: top" />
+            <input type="range" id="trackBar" min="1" max="10" step="1" value="1" onmousedown='track_stop();' onchange='track_start();' style="display: none;vertical-align: top" />
 
 	    &nbsp; Session:<span id="session" style="color: #f00;"></span>:<span id="iteration" style="color: #33f;"></span>:<span id="frame_idx" style="color: #00f;"></span>
             &nbsp; Iterations:<input id='iterations' style="width:25px; text-align: center">
@@ -117,6 +117,7 @@
 
 	function __stop() {
 	    play_stats = playStats.STOPPED;
+
 	    document.getElementById('startButton').value = 'Continue';
             document.getElementById('startButton').disabled = false;
 	    document.getElementById('VNC_status').textContent = "Stopped";
@@ -160,6 +161,20 @@
 	    }
 	}
 
+	function track_stop() {
+	    if (fname) {
+		if (frame_idx < VNC_frame_data.length) {
+		    __stop();
+		}
+	    }
+	}
+
+	function track_start() {
+	    document.getElementById('frame_idx').textContent = trackbar.value;
+	    document.getElementById('skipframes').value = trackbar.value;
+	    start();
+	}
+
         function finish() {
             // Finished with all iterations
             var total_time, end_time = (new Date()).getTime();
@@ -196,13 +211,12 @@
             }
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
+                trackbar.max = VNC_frame_data.length;
+                trackbar.style.display = "inline-block";
             }
             // Play immediately after load the data
             document.getElementById('startButton').disabled = false;
             document.getElementById('VNC_status').textContent = "Loaded";
-
-            trackbar.style.display = "inline-block";
-            trackbar.max = VNC_frame_data.length;
 
             start();
         }
