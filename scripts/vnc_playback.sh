@@ -30,7 +30,7 @@ else
     token=`echo -n $CONTAINER_IP | $ENCRYPT_CMD | cut -d' ' -f1`
 fi
 
-URL="$HTTP://$HOST_NAME:$PORT/tests/vnc_playback.html?mode=realtime&data=$VNC_DATA"
+URL="$HTTP://$HOST_NAME:$PORT/play.html?data=$VNC_DATA"
 
 echo "LOG: URL: $URL"
 
