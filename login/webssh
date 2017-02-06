@@ -8,10 +8,10 @@ source ${TOP_DIR}/config $*
 [ -z "$CONTAINER_IP" ] && CONTAINER_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_NAME`
 [ -z "$PORT" ] && PORT=$LOCAL_WEBSSH_PORT
 
-URL="https://$HOST_NAME:$PORT/?ssh=ssh://ubuntu:ubuntu@$CONTAINER_IP:$SSH_PORT/"
+URL="$HTTP://$HOST_NAME:$PORT/?ssh=ssh://ubuntu:ubuntu@$CONTAINER_IP:$SSH_PORT/"
 
 echo "LOG: URL: $URL"
 
 # FIXME: chromium-browser doesn't support Chinese input for gateone now
 # Only firefox works.
-(firefox $URL 2>&1>/dev/null &) 2>&1>/dev/null
+(chromium-browser $URL 2>&1>/dev/null &) 2>&1>/dev/null

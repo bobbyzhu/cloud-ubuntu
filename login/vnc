@@ -11,11 +11,7 @@ source ${TOP_DIR}/config $*
 
 token=`echo -n $CONTAINER_IP | $ENCRYPT_CMD | cut -d' ' -f1`
 
-if [ -n "HTTPS" -a "$HTTPS" == "0" ]; then
-    URL="http://$HOST_NAME:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=0&token=$token"
-else
-    URL="https://$HOST_NAME:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=1&token=$token"
-fi
+URL="$HTTP://$HOST_NAME:$PORT/vnc.html?password=ubuntu&autoconnect=1&token=$token&encrypt=$ENCRYPT"
 
 echo "LOG: URL: $URL"
 
