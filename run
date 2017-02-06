@@ -10,12 +10,8 @@ which xrandr 2>&1 >/dev/null
 [ $? -eq 0 ] && SCREEN_SIZE=`xrandr --current | grep +$ | tr -s ' ' | cut -d' ' -f2`
 
 [ -z "$SCREEN_SIZE" ] && SCREEN_SIZE=1024x768
-
-[ -z "$HOST_NAME" ] && HOST_NAME=localhost
-[ -z "$UNIX_PWD" ] && UNIX_PWD=ubuntu
-[ -z "$VNC_PWD" ] && VNC_PWD=ubuntu
 [ -z "$PORT_MAP" ] && PORT_MAP="$DEFAULT_PORT_MAP"
-[ -z "$ENV_ARGS" ] && ENV_ARGS=" -e UNIX_PWD=$UNIX_PWD -e VNC_PWD=$VNC_PWD -e SCREEN_SIZE=$SCREEN_SIZE"
+[ -z "$ENV_ARGS" ] && ENV_ARGS=" -e UNIX_USER=$UNIX_USER -e UNIX_PWD=$UNIX_PWD -e VNC_PWD=$VNC_PWD -e SCREEN_SIZE=$SCREEN_SIZE"
 [ -z "$EXTRA_ARGS" ] && EXTRA_ARGS=""
 
 docker run \

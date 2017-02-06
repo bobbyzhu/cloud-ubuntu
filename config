@@ -20,7 +20,7 @@ else
 fi
 
 CORE_NAME=$(< ${TOP_DIR}/name)
-HOST_NAME=$(< ${TOP_DIR}/host)
+[ -z "$HOST_NAME" ] && HOST_NAME=$(< ${TOP_DIR}/host)
 
 if [ "$FEATURE" == "base" ]; then
     IMAGE_NAME=${CORE_NAME}
@@ -52,13 +52,17 @@ fi
 
 [ $LOG -eq 1 ] && echo "CONTAINER: $CONTAINER_NAME"
 
-VNC_PORT=6080
-SSH_PORT=22
-WEBSSH_PORT=443
+[ -z "$UNIX_USER" ] && UNIX_USER=ubuntu
+[ -z "$UNIX_PWD" ] && UNIX_PWD=ubuntu
+[ -z "$VNC_PWD" ] && VNC_PWD=ubuntu
 
-LOCAL_VNC_PORT=6080
-LOCAL_SSH_PORT=2222
-LOCAL_WEBSSH_PORT=4433
+[ -z "$VNC_PORT" ] && VNC_PORT=6080
+[ -z "$SSH_PORT" ] && SSH_PORT=22
+[ -z "$WEBSSH_PORT" ] && WEBSSH_PORT=443
+
+[ -z "$LOCAL_VNC_PORT" ] && LOCAL_VNC_PORT=6080
+[ -z "$LOCAL_SSH_PORT" ] && LOCAL_SSH_PORT=2222
+[ -z "$LOCAL_WEBSSH_PORT" ] && LOCAL_WEBSSH_PORT=4433
 
 [ -z "$LAB_SECURITY" ] && LAB_SECURITY=0
 
