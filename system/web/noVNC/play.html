@@ -36,7 +36,7 @@
 	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up, Goto the Begin">
 	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left, Backfoward frames">
 
-	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
+	    <input id="trackBar" type="range" min="0" max="10" step="1" value="0" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
 	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right, Fastforward 10 frames">
 	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down, Goto the End"><br>
@@ -91,7 +91,7 @@
 	var track_bar_stats = trackBarStats.INIT;
 	var prev_track_value;
 
-        var fname, start_time, play_stats, skipframes, messageon;
+        var fname, start_time, play_stats, frame_idx_max, skipframes, messageon;
 	var track_bar = document.getElementById('trackBar');
 	var cell = document.getElementById('messages');
 	var iter = document.getElementById('iteration');
@@ -111,7 +111,8 @@
 	var mode2 = document.getElementById('mode2');
 
         play_stats = playStats.INIT;
-	prev_track_value = track_bar.max;
+	prev_track_value = 0;
+	frame_idx_max = 0;
 
         function message(str) {
 	    if (messageon) {
@@ -124,10 +125,10 @@
         function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
 	    if (fname)
-		fidx.textContent = (frame_idx+1) + " . " + parseInt((frame_idx + 1)*100/VNC_frame_data.length) + "%";
+		fidx.textContent = (frame_idx + 1) + " . " + parseInt((frame_idx + 1) *100/(frame_idx_max + 1)) + "%";
 
 	    if ((frame_idx > skipframes) && ___running())
-		track_bar.value = frame_idx + 1;
+		track_bar.value = frame_idx;
         }
 
 	function ___running() {
@@ -202,8 +203,7 @@
 	    track_bar.disabled = false;
 
 	    skipframes = 0;
-	    jumpto.textContent = 0;
-	    prev_track_value = track_bar.max;
+	    prev_track_value = frame_idx_max;
 	}
 
 	function __continue() {
@@ -225,8 +225,6 @@
 	}
 
 	function start() {
-            skipframes = Number(jumpto.textContent);
-	    //console.info("skipframes is " + skipframes);
             iterations = Number(iters.value);
 
             if (mode1.checked || (skipframes > frame_idx)) {
@@ -237,7 +235,6 @@
                 mode = 'realtime';
             }
 
-            //console.info("play stats is " + play_stats);
 	    if (play_stats != playStats.RUNNING) {
 
 	        if (mode === "fullspeed") {
@@ -260,7 +257,7 @@
 
 	function mode1_checked() {
 	    skipframes = 0;
-	    jumpto.textContent = "0";
+	    jumpto.textContent = 0;
 	}
 
 	function track_stop() {
@@ -268,10 +265,9 @@
 		return;
 
 	    start_btn.disabled = true;
-	    //console.info("trackBar stats is " + track_bar_stats);
 	    track_bar_stats = trackBarStats.DOWN;
 	    if (fname) {
-		if (frame_idx < VNC_frame_data.length) {
+		if (frame_idx < frame_idx_max) {
 		    __stop();
 		}
 	    }
@@ -281,10 +277,10 @@
 	    if (track_bar.disabled)
 		return;
 
-	    //console.info("trackBar stats is " + track_bar_stats);
 	    if ((track_bar_stats === trackBarStats.DOWN) || (track_bar_stats === trackBarStats.MOVE)) {
 		if (!___running()) {
-	            jumpto.textContent = track_bar.value;
+	            skipframes = Number(track_bar.value) + 1;
+	            jumpto.textContent = Number(skipframes) + 1;
 		}
 	        track_bar_stats = trackBarStats.MOVE;
 	    }
@@ -298,14 +294,12 @@
 	    if (track_bar.disabled)
 		return;
 
-	    //console.info("trackBar stats is " + track_bar_stats);
 	    track_move();
 
 	    track_bar.disabled = true;
 	    track_bar_stats = trackBarStats.UP;
 	    message("Start track_start()");
-	    //console.info("jumpto.value is " + jumpto.textContent + " track_bar.value is " + track_bar.value);
-	    if (frame_idx > Number(track_bar.value))
+	    if (frame_idx > skipframes)
 		finish();
 	    //sleep(200);
 	    start();
@@ -314,7 +308,6 @@
 	function track_click(button) {
 	    var tmp;
 
-	    //console.info("track_bar.disabled is " + track_bar.disabled);
 	    if (track_bar.disabled)
 		return;
 
@@ -327,8 +320,8 @@
 
 	    switch(button) {
 		case 'begin':
-		    if (tmp > 2)
-			track_bar.value = 2;
+		    if (tmp > 0)
+			track_bar.value = 0;
 		    else {
 			__resume();
 			return;
@@ -336,9 +329,8 @@
 		    begin_btn.disabled = true;
 		    break;
 		case 'end':
-		    //console.info("track_bar.value is " + track_bar.value + " track_bar.max is " + track_bar.max);
-		    if (tmp < track_bar.max)
-			track_bar.value = track_bar.max;
+		    if (tmp < frame_idx_max)
+			track_bar.value = frame_idx_max;
 		    else {
 			__resume();
 			return;
@@ -346,6 +338,11 @@
 		    end_btn.disabled = true;
 		    break;
 		case 'minus':
+		    if (tmp === 0) {
+			__resume();
+			return;
+		    }
+
 		    if (tmp > 2500)
 		        tmp = parseInt(tmp / 2);
 		    else if (tmp > 1500)
@@ -365,33 +362,33 @@
 
 		    while (prev_track_value <= tmp)
 			tmp = tmp - 10;
+
 		    if (tmp > 0)
 		        track_bar.value = tmp;
-		    else {
-			__resume();
-			return;
-		    }
+		    else
+		        track_bar.value = 0;
 		    minus_btn.disabled = true;
 		    break;
 		case 'plus':
-		    tmp = tmp + 10;
-		    if (tmp < track_bar.max)
-			track_bar.value = tmp;
-		    else {
+		    if (tmp === frame_idx_max) {
 			__resume();
 			return;
 		    }
+
+		    tmp = tmp + 10;
+		    if (tmp < frame_idx_max)
+			track_bar.value = tmp;
+		    else
+			track_bar.value = frame_idx_max;
 		    plus_btn.disabled = true;
 		    break;
 	    }
-	    //console.info("track_bar.value = " + track_bar.value + "prev_track_value = " + prev_track_value);
-	    prev_track_value = track_bar.value;
+	    prev_track_value = Number(track_bar.value);
 	    //sleep(300);
 	    track_start();
 	}
 
 	document.onkeydown = function(e) {
-	    //console.info("mode is " + mode);
 	    if (track_bar.disabled || (mode === "fullspeed"))
 		return;
 
@@ -443,8 +440,6 @@
 	    if ((mode == 'fullspeed') && (skipframes > 0))
 		mode = 'realtime';
 
-	    //console.info("mode is " + mode + " skipframes is " + skipframes + " frame_idx is " + frame_idx);
-
 	    finish();
 	    __resume();
 	}
@@ -470,9 +465,12 @@
             }
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
-                track_bar.max = VNC_frame_data.length;
-		prev_track_value = track_bar.max;
-	        size.textContent = track_bar.max;
+		frame_idx_max = VNC_frame_data.length - 1;
+
+                track_bar.max = frame_idx_max;
+		prev_track_value = frame_idx_max;
+	        size.textContent = VNC_frame_data.length;
+
                 track_bar.style.display = "inline-block";
 
 	        start_btn.style.display = 'inline-block';
