@@ -33,7 +33,7 @@ RUN apt-get install -y --force-yes --no-install-recommends \
 
 # RUN sed -i -e "s%cn.archive.ubuntu.com%mirrors.linode.com%g" /etc/apt/sources.list
 
-ADD system/vm_embedded/ /
+ADD system/base/ /
 
 EXPOSE 5900 22
 
