@@ -23,6 +23,7 @@ RUN rm /etc/apt/sources.list.d/emdebian.list
 
 RUN apt-get -y update
 
+# Need to install the extra tools added by Dockerfile.vm and its parent Dockerfile.dev_cn_input
 RUN apt-get install -y --force-yes --no-install-recommends \
 	g++ \
     && apt-get autoclean -y \
