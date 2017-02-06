@@ -8,7 +8,7 @@
         <div id="VNC_control">
 	    <input id='startButton' type='button' value='Start' style='min-width:50px'
 		    onclick="start();" disabled>
-            <input type="range" id="trackBar" min="1" max="10" step="1" value="1" onmousedown='track_stop();' onmousemove='track_move();' onchange='track_start();' style="display: none;vertical-align: top" />
+            <input type="range" id="trackBar" min="1" max="10" step="1" value="1" onmousedown='track_stop();' onmousemove='track_move();' onmouseup='track_start();' style="display: none;vertical-align: top" />
 
 	    &nbsp; Session:<span id="session" style="color: #f00;"></span>:<span id="iteration" style="color: #33f;"></span>:<span id="frame_idx" style="color: #00f;"></span>
             &nbsp; Iterations:<input id='iterations' style="width:25px; text-align: center">
@@ -178,6 +178,7 @@
 	}
 
 	function track_start() {
+	    track_move();
 	    start();
 	}
 
