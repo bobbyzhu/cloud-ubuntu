@@ -7,4 +7,8 @@ source ${TOP_DIR}/config $*
 [ -z "$HOST" ] && HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_NAME`
 [ -z "$PORT" ] && PORT=$SSH_PORT
 
-ssh ubuntu@$HOST -p $PORT
+SSH_CMD="ssh ubuntu@$HOST -p $PORT"
+
+echo $SSH_CMD
+
+eval $SSH_CMD

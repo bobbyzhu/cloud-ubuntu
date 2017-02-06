@@ -9,6 +9,7 @@ source ${TOP_DIR}/config $*
 
 URL="https://localhost:$PORT/?ssh=ssh://ubuntu:ubuntu@$HOST:$SSH_PORT/"
 
+echo "LOG: URL: $URL"
 
 # FIXME: chromium-browser doesn't support Chinese input for gateone now
 # Only firefox works.

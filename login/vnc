@@ -16,4 +16,6 @@ else
     URL="https://localhost:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=1&token=$token"
 fi
 
+echo "LOG: URL: $URL"
+
 (chromium-browser $URL 2>&1>/dev/null &) 2>&1>/dev/null
