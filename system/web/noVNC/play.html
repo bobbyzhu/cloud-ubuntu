@@ -69,6 +69,7 @@
 
     <script type="text/javascript">
         var INCLUDE_URI= "./";
+        //var INCLUDE_URI= "http://example.com/";
     </script>
     <script src="./core/util.js"></script>
     <script src="./app/webutil.js"></script>
@@ -147,9 +148,10 @@
 
         fname = WebUtil.getQueryVar('data', null);
         if (fname) {
-            message("Loading " + fname);
+	    var tmp = fname.replace(/.*\//,"");
+            message("Loading " + tmp);
 
-	    session.textContent = "#"+ fname;
+	    session.textContent = "#"+ tmp;
 	    vnc_status.textContent = "Loading";
 
             // Load supporting scripts
@@ -161,7 +163,7 @@
                 'recordings': [fname]});
 
             play_stats = playStats.LOADING;
-
+	    fname = tmp;
         } else {
             vnc_status.textContent = 'Must specify data=FOO in query string.';
             message("Must specify data=FOO in query string.");
