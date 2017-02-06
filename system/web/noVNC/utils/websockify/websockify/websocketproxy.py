@@ -127,7 +127,7 @@ Traffic Legend:
 
         self.log_message("token is %s", token)
 
-        if token.find('vnc:') == 0:
+        if self.public and token.find('vnc:') == 0:
             result_pair = token.replace('vnc://','').replace('vnc:', '').split(':')
             if len(result_pair) == 1:
                 if len(result_pair[0]) == 0:
@@ -424,6 +424,8 @@ def websockify_init():
     parser.add_option("--token-source", default=None, metavar="ARG",
                       help="an argument to be passed to the token plugin"
                            "on instantiation")
+    parser.add_option("--public", action="store_true",
+            help="allow to access external vnc server with 'token=vnc://host:port'")
     parser.add_option("--auth-plugin", default=None, metavar="PLUGIN",
                       help="use the given Python class to determine if "
                            "a connection is allowed")
@@ -582,6 +584,7 @@ class LibProxyServer(ForkingMixIn, HTTPServer):
         if record:
             self.record = os.path.abspath(record)
         self.run_once  = kwargs.pop('run_once', False)
+        self.public  = kwargs.pop('public', False)
         self.handler_id = 0
 
         for arg in kwargs.keys():

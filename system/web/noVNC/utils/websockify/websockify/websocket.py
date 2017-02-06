@@ -100,6 +100,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
         self.daemon = getattr(server, "daemon", False)
         self.record = getattr(server, "record", False)
         self.run_once = getattr(server, "run_once", False)
+        self.public = getattr(server, "public", False)
         self.rec        = None
         self.handler_id = getattr(server, "handler_id", False)
         self.file_only = getattr(server, "file_only", False)
@@ -606,7 +607,7 @@ class WebSocketServer(object):
             verbose=False, cert='', key='', ssl_only=None,
             daemon=False, record='', web='',
             file_only=False,
-            run_once=False, timeout=0, idle_timeout=0, traffic=False,
+            run_once=False, public=False, timeout=0, idle_timeout=0, traffic=False,
             tcp_keepalive=True, tcp_keepcnt=None, tcp_keepidle=None,
             tcp_keepintvl=None, auto_pong=False, strict_mode=True):
 
@@ -619,6 +620,7 @@ class WebSocketServer(object):
         self.ssl_only       = ssl_only
         self.daemon         = daemon
         self.run_once       = run_once
+        self.public         = public
         self.timeout        = timeout
         self.idle_timeout   = idle_timeout
         self.traffic        = traffic
