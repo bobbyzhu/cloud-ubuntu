@@ -5,27 +5,32 @@
 
 	<style type="text/css">
 	    body { background-color:#eee; font-size:12px; font-family:'Tahoma', 'Verdana'; text-align:center }
-	    body, a,input,span { vertical-align:middle }
+	    body,a,input,span { vertical-align:middle }
+	    div { white-space:nowrap; overflow-x:auto }
 
-	    #iterations, #skipframes { width:30px; }
+	    a { text-decoration: none; outline: none; }
+	    #session { font-size: 110%; vertical-align: top }
+	    #iterations { width:30px; }
 
-	    #startButton { width:80px; }
+	    #startButton { width:100px; }
 	    #trackBar { width: 368px; display:none; }
 	    #messages { font-size:9; margin: 0 auto; display:none }
 	</style>
     </head>
     <body>
 
+	<h1><a href="http://tinylab.org" target="_blank" title="Based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">TinyLab.org noVNC Player</a></h1>
+
         <div id="VNC_control">
+	    <div><a href="#VNC_canvas" title="Goto the video"><span id="session"></span></a><a>:</a><span id="iteration"></span><a>:</a><span id="size"></span><a>:</a><span id="skipframes"></span><a>:</a><span id="frame_idx"></span></div><br>
+
 	    <input id='startButton' type='button' value='Start' onclick="start();" disabled>
-	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
-	    &nbsp; <span id="session"></span><a>:</a><span id="iteration"></span><a>:</a><span id="frame_idx"></span><br>
+	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' /><br>
 
 	    <div id='buttons' style="display: none;"><br>
 	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
 	    &nbsp; <a>Realtime: </a><input type='radio' id='mode2' name='mode' checked>
 	    &nbsp; <a>Iterations: </a><input id='iterations'>
-	    &nbsp; <a>skipFrames: </a><input id='skipframes'>
 	    <br><br></div>
 
             <textarea id="messages" cols=80 rows=10></textarea><br>
@@ -80,6 +85,7 @@
 	var vnc_status = document.getElementById('VNC_status');
 	var start_btn = document.getElementById('startButton');
 	var jumpto = document.getElementById('skipframes');
+	var size = document.getElementById('size');
 	var iters = document.getElementById('iterations');
 	var mode1 = document.getElementById('mode1');
 	var mode2 = document.getElementById('mode2');
@@ -111,7 +117,7 @@
         if (fname) {
             message("Loading " + fname);
 
-	    session.textContent = fname;
+	    session.textContent = "#"+ fname;
 	    vnc_status.textContent = "Loading";
 
             // Load supporting scripts
@@ -185,7 +191,7 @@
 	}
 
 	function start() {
-            skipframes = jumpto.value;
+            skipframes = jumpto.textContent;
             iterations = iters.value;
 
             if (mode1.checked || (skipframes > frame_idx)) {
@@ -214,7 +220,7 @@
 	}
 
 	function mode1_checked() {
-	    jumpto.value = 0;
+	    jumpto.textContent = "0";
 	}
 
 	function track_stop() {
@@ -238,7 +244,7 @@
 	    //console.info("trackBar stats is " + trackbar_stats);
 	    if ((trackbar_stats === trackBarStats.DOWN) || (trackbar_stats === trackBarStats.MOVE)) {
 		if ((play_stats === playStats.STOPPED) || (play_stats === playStats.FINISH)) {
-	            jumpto.value = trackbar.value;
+	            jumpto.textContent = trackbar.value;
 		}
 	        trackbar_stats = trackBarStats.MOVE;
 	    }
@@ -254,8 +260,8 @@
 	    trackBar.disabled = true;
 	    trackbar_stats = trackBarStats.UP;
 	    message("Start track_start()");
-	    //console.info("jumpto.value is " + jumpto.value + " trackbar.value is " + trackbar.value);
-	    if (frame_idx > jumpto.value)
+	    //console.info("jumpto.value is " + jumpto.textContent + " trackbar.value is " + trackbar.value);
+	    if (frame_idx > trackbar.value)
 		finish();
 	    start();
 	}
@@ -289,7 +295,7 @@
             messageon = WebUtil.getQueryVar('message', 0);
 
             iters.value = iterations;
-            jumpto.value = skipframes;
+            jumpto.textContent = skipframes;
             mode = WebUtil.getQueryVar('mode', 3);
 
             if (mode === 'fullspeed') {
@@ -304,6 +310,7 @@
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
                 trackbar.max = VNC_frame_data.length;
+	        size.textContent = trackbar.max;
                 trackbar.style.display = "inline-block";
             }
             // Play immediately after load the data
