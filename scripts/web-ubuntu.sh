@@ -14,10 +14,12 @@
 # 3. Public for 'vnc://host:port' access
 #
 #    VNC_PUBLIC=1 ./scripts/web-ubuntu.sh
+#    GATEONE_PUBLIC=1 ./scripts/web-ubuntu.sh
 #
 # 4. Basic Http Auth (Chromium not support, Firefox works)
 #
 #    VNC_AUTH='user:pass' ./scripts/web-ubuntu.sh
+#    GATEONE_AUTH='pam' ./scripts/web-ubuntu.sh    # options: none, pam, ...
 #
 
 TOP_DIR=$(cd $(dirname $0) && pwd)/../
@@ -37,6 +39,8 @@ source ${TOP_DIR}/config $* >/dev/null 2>&1
 [ -z "$VNC_TIMEOUT" ] && VNC_TIMEOUT=0
 [ -z "$VNC_PUBLIC" ] && VNC_PUBLIC=0
 [ -z "$VNC_AUTH" ] && VNC_AUTH=""
+[ -z "$GATEONE_AUTH" ] && GATEONE_AUTH=""
+[ -z "$GATEONE_PUBLIC" ] && GATEONE_PUBLIC=""
 
 if [ $VNC_RECORD -eq 1 -o $VNC_PLAYER -eq 1 ]; then
     VNC_RECORD_DIR=/noVNC/recordings
@@ -49,6 +53,6 @@ fi
 
 EXTRA_ARGS="$EXTRA_ARGS -e PROXY_SPEED_LIMIT=0 -e NOSSL=$NOSSL"
 EXTRA_ARGS="$EXTRA_ARGS -e VNC_RECORD=$VNC_RECORD -e VNC_PLAYER=$VNC_PLAYER -e VNC_TIMEOUT=$VNC_TIMEOUT -e VNC_RECORD_FILE=$VNC_RECORD_FILE $VOLUME_MAP"
-EXTRA_ARGS="$EXTRA_ARGS -e VNC_PUBLIC=$VNC_PUBLIC -e VNC_AUTH='$VNC_AUTH'"
+EXTRA_ARGS="$EXTRA_ARGS -e VNC_PUBLIC=$VNC_PUBLIC -e VNC_AUTH=$VNC_AUTH -e GATEONE_AUTH=$GATEONE_AUTH -e GATEONE_PUBLIC=$GATEONE_PUBLIC"
 
 EXTRA_ARGS="$EXTRA_ARGS" UNIX_PWD="$UNIX_PWD" VNC_PWD="$VNC_PWD" PORT_MAP="$DEFAULT_PORT_MAP" ${TOP_DIR}/run web
