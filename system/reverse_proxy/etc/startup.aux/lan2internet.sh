@@ -25,8 +25,6 @@ fi
 
 for ((i=0; i<=$BATCH; i++))
 do
-    ((REMOTE_SSH_PORT+=1))
-    ((REMOTE_VNC_PORT+=1))
     [ $LOCAL_ADDR != "localhost" -a -n "$LOCAL_ADDR_BASE" ] && LOCAL_ADDR=${LOCAL_ADDR_BASE}.$((i+1))
 
     SSH_CMD="$CMD_PRE $REMOTE_SSH_PORT:$LOCAL_ADDR:$LOCAL_SSH_PORT"
@@ -36,4 +34,7 @@ do
     eval $SSH_CMD &
     eval $VNC_CMD &
     [ -n "$MISC_CMD" ] && eval $MISC_CMD &
+
+    ((REMOTE_SSH_PORT+=1))
+    ((REMOTE_VNC_PORT+=1))
 done
