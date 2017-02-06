@@ -200,6 +200,10 @@
 	    plus_btn.disabled = false;
 	    minus_btn.disabled = false;
 	    track_bar.disabled = false;
+
+	    skipframes = 0;
+	    jumpto.textContent = 0;
+	    prev_track_value = track_bar.max;
 	}
 
 	function __continue() {
@@ -221,8 +225,9 @@
 	}
 
 	function start() {
-            skipframes = jumpto.textContent;
-            iterations = iters.value;
+            skipframes = Number(jumpto.textContent);
+	    //console.info("skipframes is " + skipframes);
+            iterations = Number(iters.value);
 
             if (mode1.checked || (skipframes > frame_idx)) {
                 message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
@@ -300,13 +305,16 @@
 	    track_bar_stats = trackBarStats.UP;
 	    message("Start track_start()");
 	    //console.info("jumpto.value is " + jumpto.textContent + " track_bar.value is " + track_bar.value);
-	    if (frame_idx > track_bar.value)
+	    if (frame_idx > Number(track_bar.value))
 		finish();
 	    //sleep(200);
 	    start();
 	}
 
 	function track_click(button) {
+	    var tmp;
+
+	    //console.info("track_bar.disabled is " + track_bar.disabled);
 	    if (track_bar.disabled)
 		return;
 
@@ -315,17 +323,29 @@
 
 	    track_stop();
 
+	    tmp = Number(track_bar.value);
+
 	    switch(button) {
 		case 'begin':
-		    track_bar.value = 2;
+		    if (tmp > 2)
+			track_bar.value = 2;
+		    else {
+			__resume();
+			return;
+		    }
 		    begin_btn.disabled = true;
 		    break;
 		case 'end':
-		    track_bar.value = track_bar.max;
+		    //console.info("track_bar.value is " + track_bar.value + " track_bar.max is " + track_bar.max);
+		    if (tmp < track_bar.max)
+			track_bar.value = track_bar.max;
+		    else {
+			__resume();
+			return;
+		    }
 		    end_btn.disabled = true;
 		    break;
 		case 'minus':
-		    var tmp = track_bar.value;
 		    if (tmp > 2500)
 		        tmp = parseInt(tmp / 2);
 		    else if (tmp > 1500)
@@ -347,16 +367,20 @@
 			tmp = tmp - 10;
 		    if (tmp > 0)
 		        track_bar.value = tmp;
-		    else
+		    else {
+			__resume();
 			return;
+		    }
 		    minus_btn.disabled = true;
 		    break;
 		case 'plus':
-		    var tmp = Number(track_bar.value) + 10;
+		    tmp = tmp + 10;
 		    if (tmp < track_bar.max)
 			track_bar.value = tmp;
-		    else
+		    else {
+			__resume();
 			return;
+		    }
 		    plus_btn.disabled = true;
 		    break;
 	    }
@@ -422,11 +446,6 @@
 	    //console.info("mode is " + mode + " skipframes is " + skipframes + " frame_idx is " + frame_idx);
 
 	    finish();
-
-	    skipframes = 0;
-	    jumpto.textContent = 0;
-	    prev_track_value = track_bar.max;
-
 	    __resume();
 	}
 
