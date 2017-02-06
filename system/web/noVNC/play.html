@@ -20,10 +20,12 @@
 	    <input id='startButton' type='button' value='Start' style='min-width:100px'
 		    onclick="start();" disabled>
 	    <div id="loop" style="display: none;"><br> Iterations: <input id='iterations' style="width:50px; text-align: center"></div>
+        </div>
 
-            <!-- Perftest:--> <input type='radio' id='mode1' name='mode' style="display: none">
+        <div id="VNC_others" style="display: none;">
+            <textarea id="messages" style="font-size: 9; display: none;" cols=80 rows=2></textarea><br>
+            <!-- Perftest:--> <input type='radio' id='mode1' name='mode' style="display: none">&nbsp;
             <!-- Realtime:--> <input type='radio' id='mode2' name='mode' style="display: none" checked>
-            <textarea id="messages" style="font-size: 9; display: none;" cols=80 rows=2></textarea>
         </div>
 
     </body>
@@ -77,7 +79,7 @@
         }
 
         function start() {
-            document.getElementById('VNC_control').style.right='6px';
+            document.getElementById('VNC_control').style.right='0.2em';
             document.getElementById('loop').style.display = 'none';
             document.getElementById('startButton').value = 'Running "' + fname + '"';
             document.getElementById('startButton').disabled = true;
