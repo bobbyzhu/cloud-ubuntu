@@ -130,7 +130,9 @@
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
             }
-            document.getElementById('startButton').disabled = false;
+            // Play immediately after load the data
+            start();
+            //document.getElementById('startButton').disabled = false;
         }
     </script>
 </html>
