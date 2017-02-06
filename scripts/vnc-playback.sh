@@ -34,4 +34,4 @@ URL="$HTTP://$HOST_NAME:$PORT/play.html?data=$VNC_DATA"
 
 echo "LOG: URL: $URL"
 
-(chromium-browser $URL 2>&1>/dev/null &) 2>&1>/dev/null
+(chromium-browser $URL >/dev/null 2>&1 &) >/dev/null 2>&1
