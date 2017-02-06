@@ -20,6 +20,7 @@ else
 fi
 
 CORE_NAME=$(< ${TOP_DIR}/name)
+HOST_NAME=$(< ${TOP_DIR}/host)
 
 if [ "$FEATURE" == "base" ]; then
     IMAGE_NAME=${CORE_NAME}

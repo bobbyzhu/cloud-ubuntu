@@ -5,15 +5,16 @@ TOP_DIR=$(cd $(dirname $0) && pwd)/..
 source ${TOP_DIR}/config $*
 
 [ -z "$ENCRYPT_CMD" ] && ENCRYPT_CMD=md5sum
-[ -z "$HOST" ] && HOST=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_NAME`
+[ -z "$HOST_NAME" ] && HOST_NAME=localhost
+[ -z "$CONTAINER_IP" ] && CONTAINER_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_NAME`
 [ -z "$PORT" ] && PORT=$LOCAL_VNC_PORT
 
-token=`echo -n $HOST | $ENCRYPT_CMD | cut -d' ' -f1`
+token=`echo -n $CONTAINER_IP | $ENCRYPT_CMD | cut -d' ' -f1`
 
 if [ -n "HTTPS" -a "$HTTPS" == "0" ]; then
-    URL="http://localhost:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=0&token=$token"
+    URL="http://$HOST_NAME:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=0&token=$token"
 else
-    URL="https://localhost:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=1&token=$token"
+    URL="https://$HOST_NAME:$PORT/vnc.html?password=ubuntu&autoconnect=1&encrypt=1&token=$token"
 fi
 
 echo "LOG: URL: $URL"
