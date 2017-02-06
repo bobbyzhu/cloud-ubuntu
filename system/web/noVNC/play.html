@@ -48,6 +48,7 @@
 	    LOADING: 1,
 	    RUNNING: 2,
 	    STOPPED: 3,
+	    FINISH: 4,
         };
 
         var fname, start_time, play_stats;
@@ -73,7 +74,7 @@
         if (fname) {
             message("Loading " + fname);
 	    document.getElementById('session').textContent = fname;
-            document.getElementById('startButton').value = 'Loading "' + fname + '"';
+            document.getElementById('VNC_status').textContent = "Loading";
             // Load supporting scripts
             WebUtil.load_scripts({
                 'core': ["base64.js", "websock.js", "des.js", "input/keysym.js",
@@ -85,6 +86,7 @@
             play_stats = playStats.LOADING;
 
         } else {
+            document.getElementById('VNC_status').textContent = 'Must specify data=FOO in query string.';
             message("Must specify data=FOO in query string.");
         }
 
@@ -165,6 +167,7 @@
 	    if (fname) {
 		if (frame_idx < VNC_frame_data.length) {
 		    __stop();
+		    finish();
 		}
 	    }
 	}
@@ -186,7 +189,7 @@
             // Shut-off event interception
             rfb.get_mouse().ungrab();
             rfb.get_keyboard().ungrab();
-            play_stats = playStats.INIT;
+            play_stats = playStats.FINISH;
 
             document.getElementById('startButton').disabled = false;
             document.getElementById('startButton').value = "Start";

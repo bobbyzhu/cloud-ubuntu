@@ -188,10 +188,10 @@ queue_next_packet = function () {
             delay = 1;
         }
 
-        if (play_stats !== playStats.STOPPED)
+        if ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
             setTimeout(do_packet, delay);
     } else {
-        if (play_stats !== playStats.STOPPED)
+        if ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
             window.setImmediate(do_packet);
     }
 };
