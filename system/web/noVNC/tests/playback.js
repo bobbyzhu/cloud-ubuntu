@@ -121,6 +121,8 @@ next_iteration = function () {
 };
 
 end_iteration = function () {
+    updatestats(iteration, frame_idx);
+
     if (rfb._display.pending()) {
         rfb._display.set_onFlush(function () {
             if (rfb._flushing) {

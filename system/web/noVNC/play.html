@@ -8,11 +8,13 @@
         <div id="VNC_control">
 	    <input id='startButton' type='button' value='Start' style='min-width:50px'
 		    onclick="start();" disabled>
-            &nbsp; Session:<span id="session" style="color: #f00;"></span>:<span id="iteration" style="color: #33f;"></span>:<span id="frame_idx" style="color: #00f;"></span>
+            <input type="range" id="trackBar" min="1" max="10" step="1" value="1" style="display: none;vertical-align: top" />
+
+	    &nbsp; Session:<span id="session" style="color: #f00;"></span>:<span id="iteration" style="color: #33f;"></span>:<span id="frame_idx" style="color: #00f;"></span>
             &nbsp; Iterations:<input id='iterations' style="width:25px; text-align: center">
             &nbsp; skipFrames:<input id='skipframes' style="width:25px; text-align: center">
-            &nbsp; Fullspeed:<input type='radio' id='mode1' name='mode'>
-            &nbsp; Realtime:<input type='radio' id='mode2' name='mode' checked><br>
+            &nbsp; Fullspeed:<input type='radio' id='mode1' name='mode' style="vertical-align: top">
+            &nbsp; Realtime:<input type='radio' id='mode2' name='mode' style="vertical-align: top" checked><br>
             <textarea id="messages" style="font-size: 9; margin-top: 10px; display: none;" cols=80 rows=5></textarea><br>
         </div>
 
@@ -49,6 +51,7 @@
         };
 
         var fname, start_time, play_stats;
+	var trackbar = document.getElementById('trackBar');
 
         play_stats = playStats.INIT;
 
@@ -61,7 +64,9 @@
 
         function updatestats(iteration, frame_idx) {
 	    document.getElementById('iteration').textContent = iteration;
-	    document.getElementById('frame_idx').textContent = frame_idx;
+	    document.getElementById('frame_idx').textContent = frame_idx + 1;
+
+            trackbar.value = frame_idx + 1;
         }
 
         fname = WebUtil.getQueryVar('data', null);
@@ -115,7 +120,7 @@
 	    document.getElementById('startButton').value = 'Continue';
             document.getElementById('startButton').disabled = false;
 	    document.getElementById('VNC_status').textContent = "Stopped";
-	    message("Stopped at the " + frame_idx + "frame!");
+	    message("Stopped at the " + frame_idx + " frame!");
 	}
 
 	function __continue() {
@@ -195,6 +200,9 @@
             // Play immediately after load the data
             document.getElementById('startButton').disabled = false;
             document.getElementById('VNC_status').textContent = "Loaded";
+
+            trackbar.style.display = "inline-block";
+            trackbar.max = VNC_frame_data.length;
 
             start();
         }
