@@ -8,8 +8,9 @@
 /*jslint browser: true, white: false */
 /*global Util, VNC_frame_data, finish */
 
+
 var rfb, mode, test_state, frame_idx, frame_length,
-    iteration, iterations, istart_time, encoding,
+    iteration, iterations, istart_time, encoding, delay,
 
     // Pre-declarations for jslint
     send_array, next_iteration, end_iteration, queue_next_packet,
@@ -106,6 +107,8 @@ next_iteration = function () {
     }
 
     frame_idx = 0;
+
+    //console.info("Start frame_idx " + frame_idx);
     istart_time = (new Date()).getTime();
     rfb.connect('test', 0, "bogus");
 
@@ -128,26 +131,28 @@ end_iteration = function () {
 };
 
 queue_next_packet = function () {
-    var frame, foffset, toffset, delay;
+    var frame, foffset, toffset;
     if (test_state !== 'running') { return; }
 
     frame = VNC_frame_data[frame_idx];
     while ((frame_idx < frame_length) && (frame.charAt(0) === "}")) {
-        //Util.Debug("Send frame " + frame_idx);
+        //console.info("Send frame " + frame_idx);
         frame_idx += 1;
         frame = VNC_frame_data[frame_idx];
     }
 
     if (frame === 'EOF') {
-        Util.Debug("Finished, found EOF");
+        console.info("Finished, found EOF");
         end_iteration();
         return;
     }
     if (frame_idx >= frame_length) {
-        Util.Debug("Finished, no more frames");
+        console.info("Finished, no more frames");
         end_iteration();
         return;
     }
+
+    //console.info("play_stats is " + play_stats);
 
     if (mode === 'realtime') {
         foffset = frame.slice(1, frame.indexOf('{', 1));
@@ -157,9 +162,11 @@ queue_next_packet = function () {
             delay = 1;
         }
 
-        setTimeout(do_packet, delay);
+        if (play_stats !== playStats.STOPPED)
+            setTimeout(do_packet, delay);
     } else {
-        window.setImmediate(do_packet);
+        if (play_stats !== playStats.STOPPED)
+            window.setImmediate(do_packet);
     }
 };
 
@@ -176,7 +183,7 @@ do_packet = function () {
         return;
     }
 
-    //Util.Debug("Processing frame: " + frame_idx);
+    //console.info("Processing frame: " + frame_idx);
     var frame = VNC_frame_data[frame_idx],
         start = frame.indexOf('{', 1) + 1;
     var u8;

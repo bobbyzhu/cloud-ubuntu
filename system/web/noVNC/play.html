@@ -42,7 +42,17 @@
     <script src="./app/webutil.js"></script>
 
     <script>
-        var fname, start_time;
+	// play Stats
+        var playStats = {
+	    INIT: 0,
+	    LOADING: 1,
+	    RUNNING: 2,
+	    STOPPED: 3,
+        };
+
+        var fname, start_time, play_stats;
+
+        play_stats = playStats.INIT;
 
         function message(str) {
             console.log(str);
@@ -63,6 +73,8 @@
                 'tests': ["playback.js"],
                 'recordings': [fname]});
 
+            play_stats = playStats.LOADING;
+
         } else {
             message("Must specify data=FOO in query string.");
         }
@@ -78,11 +90,13 @@
             document.getElementById('VNC_status').textContent = mesg;
         }
 
-        function start() {
+        function __start() {
+            play_stats = playStats.RUNNING;
+
             document.getElementById('VNC_control').style.right='0.2em';
             document.getElementById('loop').style.display = 'none';
-            document.getElementById('startButton').value = 'Running "' + fname + '"';
-            document.getElementById('startButton').disabled = true;
+            document.getElementById('startButton').value = 'Stop running "' + fname + '"';
+            // document.getElementById('startButton').disabled = true;
 
             iterations = document.getElementById('iterations').value;
             iteration = 0;
@@ -101,6 +115,35 @@
             next_iteration();
         }
 
+	function __stop() {
+	    play_stats = playStats.STOPPED;
+	    document.getElementById('startButton').value = 'Continue play "' + fname + '"';
+            document.getElementById('startButton').disabled = false;
+	    message("Stopped at the " + frame_idx + "frame!");
+	}
+
+	function __continue() {
+            document.getElementById('startButton').value = 'Stop running "' + fname + '"';
+
+	    if (mode === 'perftest') {window.setImmediate(do_packet); }
+	    else { setTimeout(do_packet, delay); }
+
+	    play_stats = playStats.RUNNING;
+	    message("Continue play the" + frame_idx + "frame!");
+	}
+
+	function start() {
+            //console.info("play stats is " + play_stats);
+	    if (play_stats != playStats.RUNNING) {
+		if (play_stats === playStats.STOPPED)
+		    __continue();
+		else
+		    __start();
+	    } else {
+		__stop();
+	    }
+	}
+
         function finish() {
             // Finished with all iterations
             var total_time, end_time = (new Date()).getTime();
@@ -112,6 +155,8 @@
             // Shut-off event interception
             rfb.get_mouse().ungrab();
             rfb.get_keyboard().ungrab();
+            play_stats = playStats.INIT;
+
             document.getElementById('VNC_control').style.right='45%';
             document.getElementById('startButton').disabled = false;
             document.getElementById('startButton').value = "Start";
@@ -133,6 +178,8 @@
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
             }
             // Play immediately after load the data
+            document.getElementById('startButton').disabled = false;
+
             start();
         }
     </script>
