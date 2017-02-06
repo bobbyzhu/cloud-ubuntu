@@ -10,11 +10,14 @@
 
 	    div a { text-decoration: none; outline: none; }
 	    h1 a { text-decoration: none; outline: none; color:#000 }
+
+	    #minusButton,#plusButton,#beginButton,#endButton { font-size: 100%; color:#aaa; display: none }
+
 	    #session { font-size: 115%; vertical-align: top }
 	    #iterations { width:30px; }
 
-	    #startButton { width:100px; }
-	    #trackBar { margin-left: 20px; width: 480px; display:none; }
+	    #startButton { width:100px; margin-right: 10px; }
+	    #trackBar { width: 450px; display:none; }
 	    #messages { font-size:9; margin: 0 auto; display:none }
 	</style>
     </head>
@@ -25,8 +28,15 @@
         <div id="VNC_control">
 	    <div><a href="#VNC_canvas" title="Goto the video"><span id="session"></span></a>&nbsp;&nbsp;<span id="loop" title="total iterations"></span><a> . </a><span id="iteration" title="current iteration"></span><a> . </a><span id="size" title="total frames"></span><a> . </a><span id="skipframes" title="frames to skip"></span><a> . </a><span id="frame_idx" title="current frame and percentage"></span></div><br>
 
-	    <input id='startButton' type='button' value='Start' onclick="start();" disabled>
-	    <input type="range" id="trackBar" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' /><br>
+	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter" disabled>
+
+	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up">
+	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left">&nbsp;
+
+	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />&nbsp;
+
+	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right">
+	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down"><br>
 
 	    <div id='buttons' style="display: none;"><br>
 	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
@@ -75,16 +85,20 @@
 	    MOVE: 2,
 	    UP: 3,
 	}
-	var trackbar_stats = trackBarStats.INIT;
+	var track_bar_stats = trackBarStats.INIT;
 
         var fname, start_time, play_stats, skipframes, messageon;
-	var trackbar = document.getElementById('trackBar');
+	var track_bar = document.getElementById('trackBar');
 	var cell = document.getElementById('messages');
 	var iter = document.getElementById('iteration');
 	var fidx = document.getElementById('frame_idx');
 	var session = document.getElementById('session');
 	var vnc_status = document.getElementById('VNC_status');
 	var start_btn = document.getElementById('startButton');
+	var begin_btn = document.getElementById('beginButton');
+	var end_btn = document.getElementById('endButton');
+	var plus_btn = document.getElementById('plusButton');
+	var minus_btn = document.getElementById('minusButton');
 	var jumpto = document.getElementById('skipframes');
 	var size = document.getElementById('size');
 	var loop = document.getElementById('loop');
@@ -107,12 +121,12 @@
 	    if (fname)
 		fidx.textContent = (frame_idx+1) + " . " + parseInt((frame_idx + 1)*100/VNC_frame_data.length) + "%";
 
-	    if ((frame_idx > skipframes) && ___playing())
-		trackbar.value = frame_idx + 1;
+	    if ((frame_idx > skipframes) && ___running())
+		track_bar.value = frame_idx + 1;
         }
 
-	function ___playing() {
-	    return ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
+	function ___running() {
+	    return (play_stats === playStats.RUNNING)
 	}
 
         fname = WebUtil.getQueryVar('data', null);
@@ -149,8 +163,7 @@
         }
 
         function __start() {
-            play_stats = playStats.RUNNING;
-	    start_btn.value = 'Stop';
+	    start_btn.value = "Ⅱ";
 	    vnc_status.textContent = "Running";
             message("Start play the " + skipframes + " Frame");
 
@@ -158,13 +171,14 @@
             start_time = (new Date()).getTime();
             //recv_message = rfb.testMode(send_array, VNC_frame_encoding);
 
+            play_stats = playStats.RUNNING;
             next_iteration();
         }
 
 	function __stop() {
 	    play_stats = playStats.STOPPED;
 
-	    start_btn.value = 'Continue';
+	    start_btn.value = '▷';
 	    vnc_status.textContent = "Stopped";
 	    message("Stopped at the " + frame_idx + " frame!");
 	}
@@ -172,15 +186,20 @@
 	function ___stop() {
 	    __stop();
 	    start_btn.disabled = false;
-	    trackBar.disabled = false;
+	    begin_btn.disabled = false;
+	    end_btn.disabled = false;
+	    plus_btn.disabled = false;
+	    minus_btn.disabled = false;
+	    track_bar.disabled = false;
 	}
 
 	function __continue() {
-	    start_btn.value = 'Stop';
+	    start_btn.value = "Ⅱ";
 	    vnc_status.textContent = "Continued";
 
-	    if (mode === 'fullspeed') { window.setImmediate(do_packet); }
-	    else {
+	    if (mode === 'fullspeed') {
+		window.setImmediate(do_packet);
+	    } else {
 		setTimeout(do_packet, delay);
 	        istart_time = (new Date()).getTime() - toffset;
 	    }
@@ -209,7 +228,11 @@
 
 	        if (mode === "fullspeed") {
 		    start_btn.disabled = true;
-		    trackBar.disabled = true;
+		    begin_btn.disabled = true;
+		    end_btn.disabled = true;
+		    plus_btn.disabled = true;
+		    minus_btn.disabled = true;
+		    track_bar.disabled = true;
 	        }
 
 		if (play_stats === playStats.STOPPED)
@@ -222,16 +245,17 @@
 	}
 
 	function mode1_checked() {
+	    skipframes = 0;
 	    jumpto.textContent = "0";
 	}
 
 	function track_stop() {
-	    if (trackBar.disabled)
+	    if (track_bar.disabled)
 		return;
 
 	    start_btn.disabled = true;
-	    //console.info("trackBar stats is " + trackbar_stats);
-	    trackbar_stats = trackBarStats.DOWN;
+	    //console.info("trackBar stats is " + track_bar_stats);
+	    track_bar_stats = trackBarStats.DOWN;
 	    if (fname) {
 		if (frame_idx < VNC_frame_data.length) {
 		    __stop();
@@ -240,32 +264,98 @@
 	}
 
 	function track_move() {
-	    if (trackBar.disabled)
+	    if (track_bar.disabled)
 		return;
 
-	    //console.info("trackBar stats is " + trackbar_stats);
-	    if ((trackbar_stats === trackBarStats.DOWN) || (trackbar_stats === trackBarStats.MOVE)) {
-		if ((play_stats === playStats.STOPPED) || (play_stats === playStats.FINISH)) {
-	            jumpto.textContent = trackbar.value;
+	    //console.info("trackBar stats is " + track_bar_stats);
+	    if ((track_bar_stats === trackBarStats.DOWN) || (track_bar_stats === trackBarStats.MOVE)) {
+		if (!___running()) {
+	            jumpto.textContent = track_bar.value;
 		}
-	        trackbar_stats = trackBarStats.MOVE;
+	        track_bar_stats = trackBarStats.MOVE;
 	    }
 	}
 
 	function track_start() {
-	    if (trackBar.disabled)
+	    if (track_bar.disabled)
 		return;
 
-	    //console.info("trackBar stats is " + trackbar_stats);
+	    //console.info("trackBar stats is " + track_bar_stats);
 	    track_move();
 
-	    trackBar.disabled = true;
-	    trackbar_stats = trackBarStats.UP;
+	    track_bar.disabled = true;
+	    track_bar_stats = trackBarStats.UP;
 	    message("Start track_start()");
-	    //console.info("jumpto.value is " + jumpto.textContent + " trackbar.value is " + trackbar.value);
-	    if (frame_idx > trackbar.value)
+	    //console.info("jumpto.value is " + jumpto.textContent + " track_bar.value is " + track_bar.value);
+	    if (frame_idx > track_bar.value)
 		finish();
 	    start();
+	}
+
+	function track_click(button) {
+	    if (track_bar.disabled)
+		return;
+
+	    skipframes = 0;
+	    jumpto.textContent = 0;
+
+	    track_stop();
+	    switch(button) {
+		case 'begin':
+		    track_bar.value = 2;
+		    begin_btn.disabled = true;
+		    break;
+		case 'end':
+		    track_bar.value = track_bar.max;
+		    end_btn.disabled = true;
+		    break;
+		case 'minus':
+		    var tmp = track_bar.value - 10;
+		    if (tmp > 0)
+			track_bar.value = tmp;
+		    minus_btn.disabled = true;
+		    break;
+		case 'plus':
+		    var tmp = Number(track_bar.value) + 10;
+		    if (tmp < track_bar.max)
+			track_bar.value = tmp;
+		    plus_btn.disabled = true;
+		    break;
+	    }
+	    //console.info("track_bar.value = " + track_bar.value);
+	    track_start();
+	}
+
+	document.onkeydown = function(e) {
+	    //console.info("mode is " + mode);
+	    if (track_bar.disabled || (mode === "fullspeed"))
+		return;
+
+	    //console.info("e.keyCode is " + e.keyCode);
+	    if (!start_btn.disabled && e.keyCode === 13)
+		start();
+
+	    if (!e.ctrlKey)
+		return;
+
+	    e = window.event || e;
+
+	    switch (e.keyCode) {
+		case 37: // Left: -
+		    track_click('minus');
+		    break;
+		case 39: // Right: +
+		    track_click('plus');
+		    break;
+		case 38: // Up: begin
+		    track_click('begin');
+		    break;
+		case 40: // Down: end
+		    track_click('end');
+		    break;
+		default:
+		    break;
+	    }
 	}
 
         function finish() {
@@ -279,15 +369,28 @@
             // Shut-off event interception
             rfb.get_mouse().ungrab();
             rfb.get_keyboard().ungrab();
-            play_stats = playStats.FINISH;
 
-            start_btn.value = "Start";
+            play_stats = playStats.FINISH;
+            start_btn.value = "▷";
             vnc_status.textContent = "Finished";
         }
 
 	function ___finish() {
+	    if ((mode == 'fullspeed') && (skipframes > 0))
+		mode = 'realtime';
+
+	    //console.info("mode is " + mode + " skipframes is " + skipframes + " frame_idx is " + frame_idx);
+
 	    start_btn.disabled = false;
-	    trackBar.disabled = false;
+	    track_bar.disabled = false;
+	    begin_btn.disabled = false;
+	    end_btn.disabled = false;
+	    plus_btn.disabled = false;
+	    minus_btn.disabled = false;
+
+	    skipframes = 0;
+	    jumpto.textContent = 0;
+
 	    finish();
 	}
 
@@ -312,12 +415,18 @@
             }
             if (fname) {
                 message("VNC_frame_data.length: " + VNC_frame_data.length);
-                trackbar.max = VNC_frame_data.length;
-	        size.textContent = trackbar.max;
-                trackbar.style.display = "inline-block";
+                track_bar.max = VNC_frame_data.length;
+	        size.textContent = track_bar.max;
+                track_bar.style.display = "inline-block";
+
+	        begin_btn.style.display = 'inline-block';
+	        end_btn.style.display = 'inline-block';
+	        plus_btn.style.display = 'inline-block';
+	        minus_btn.style.display = 'inline-block';
+
+                // Play immediately after load the data
+                start_btn.disabled = false;
             }
-            // Play immediately after load the data
-            start_btn.disabled = false;
             vnc_status.textContent = "Loaded";
 
             start();

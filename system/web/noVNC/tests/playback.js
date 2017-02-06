@@ -192,10 +192,10 @@ queue_next_packet = function () {
             delay = 1;
         }
 
-        if (___playing())
+        if (___running())
             setTimeout(do_packet, delay);
     } else {
-        if (___playing())
+        if (___running())
             window.setImmediate(do_packet);
     }
 };
