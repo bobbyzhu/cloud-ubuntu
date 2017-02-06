@@ -96,7 +96,8 @@
 
         function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
-	    fidx.textContent = frame_idx + 1;
+	    if (fname)
+		fidx.textContent = (frame_idx+1) +":"+ parseInt((frame_idx + 1)*100/VNC_frame_data.length) + "%";
 
 	    if ((frame_idx > skipframes) && ___playing())
 		trackbar.value = frame_idx + 1;
