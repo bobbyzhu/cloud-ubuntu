@@ -167,14 +167,12 @@ queue_next_packet = function () {
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
         mode = 'realtime';
 
-        if (rfb._display.pending())
-            rfb._display.flush();
-
-        rfb._display.set_onFlush(function () {
-            if (rfb._flushing) {
-                rfb._onFlush();
-            }
-        });
+        if (rfb._flushing) {
+            rfb._display.set_onFlush(function () {
+                if (rfb._flushing)
+                    rfb._onFlush();
+            });
+	}
     }
 
     console.info("play mode is " + mode);
