@@ -286,10 +286,6 @@
 	    }
 	}
 
-	function sleep(ms) {
-	    return new Promise(resolve => setTimeout(resolve, ms));
-	}
-
 	function track_start() {
 	    if (track_bar.disabled)
 		return;
@@ -301,7 +297,6 @@
 	    message("Start track_start()");
 	    if (frame_idx > skipframes)
 		finish();
-	    //sleep(200);
 	    start();
 	}
 
@@ -384,7 +379,6 @@
 		    break;
 	    }
 	    prev_track_value = Number(track_bar.value);
-	    //sleep(300);
 	    track_start();
 	}
 
