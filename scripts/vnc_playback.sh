@@ -21,7 +21,7 @@ source ${TOP_DIR}/config $*
 [ -z "$CONTAINER_IP" ] && CONTAINER_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_NAME`
 [ -z "$PORT" ] && PORT=$LOCAL_VNC_PORT
 
-VNC_DATA=$1
+[ -n "$1" ] && VNC_DATA=$1
 [ -z "$VNC_DATA" ] && VNC_DATA=vnc.record.data.1
 
 if [ "$VNC_PORT" != "6080" ]; then
