@@ -26,20 +26,20 @@
     </head>
     <body>
 
-	<h1><a href="http://tinylab.org" target="_blank" title="Based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
+	<h1><a href="http://tinylab.org" target="_blank" title="Subproject of Cloud Lab (github.com/tinyclub/cloud-lab), based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
 
         <div id="VNC_control">
-	    <div><a href="#VNC_canvas" title="Goto the video"><span id="session"></span></a>&nbsp;&nbsp;<span id="loop" title="total iterations"></span><a> . </a><span id="iteration" title="current iteration"></span><a> . </a><span id="size" title="total frames"></span><a> . </a><span id="skipframes" title="frames to skip"></span><a> . </a><span id="frame_idx" title="current frame and percentage"></span></div><br>
+	    <div><a href="#VNC_canvas" title="Goto the session video"><span id="session"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span></div><br>
 
-	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter" disabled>
+	    <input id='startButton' type='button' value='▷' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
-	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up">
-	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left">
+	    <input id="beginButton" type='button' value='◀' onclick="track_click('begin');" title="Ctrl + Up, Goto the Begin">
+	    <input id="minusButton" type='button' value='-' onclick="track_click('minus');" title="Ctrl + Left, Backfoward 10 frames">
 
-	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
+	    <input id="trackBar" type="range" min="1" max="10" step="1" value="1" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
-	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right">
-	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down"><br>
+	    <input id="plusButton" type='button' value='+' onclick="track_click('plus');" title="Ctrl + Right, Fastforward 10 frames">
+	    <input id="endButton" type='button' value='▶' onclick="track_click('end');" title="Ctrl + Down, Goto the End"><br>
 
 	    <div id='buttons' style="display: none;"><br>
 	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
