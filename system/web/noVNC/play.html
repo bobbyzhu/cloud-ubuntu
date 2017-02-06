@@ -201,9 +201,13 @@
 	    //console.info("traceBar stats is " + tracebar_stats);
 	    tracebar_stats = traceBarStats.DOWN;
 	    if (fname) {
+		skipframes = trackbar.value;
+		//console.info("frame_idx=" + frame_idx + " skipframes=" + skipframes);
 		if (frame_idx < VNC_frame_data.length) {
 		    __stop();
-		    finish();
+		    if (frame_idx > skipframes) {
+		        finish();
+		    }
 		}
 	    }
 	}
