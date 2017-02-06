@@ -102,6 +102,8 @@ next_iteration = function () {
 
     iteration += 1;
     if (iteration > iterations) {
+	start_btn.disabled = false;
+	trackBar.disabled = false;
         finish();
         return;
     }
@@ -167,8 +169,12 @@ queue_next_packet = function () {
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
         mode = 'realtime';
 
+	__stop();
+	start_btn.disabled = false;
+	trackBar.disabled = false;
+
 	foffset = frame.slice(1, frame.indexOf('{', 1));
-	toffset = foffset - 2000;
+	toffset = foffset - 1000;
 	istart_time = (new Date()).getTime() - toffset;
 
 	if (rfb._flushing) {
