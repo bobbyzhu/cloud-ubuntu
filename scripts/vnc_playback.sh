@@ -1,4 +1,17 @@
 #!/bin/bash
+#
+# vnc-playback.sh
+#
+# To playback the VNC session, must record it with:
+#
+#    $ VNC_RECORD=1 ./scripts/web-ubuntu.sh
+#
+# The VNC data is stored in noVNC/recordings/ and named with vnc.record.data.[session number]
+#
+# Play back the session:
+#
+#    $ VNC_DATA=vnc.record.data.1 ./scripts/vnc-playback.sh
+#
 
 TOP_DIR=$(cd $(dirname $0) && pwd)/..
 
