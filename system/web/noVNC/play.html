@@ -96,13 +96,17 @@
 	    }
         }
 
-        function updatestats(iteration, frame_idx) {
+        function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
 	    fidx.textContent = frame_idx + 1;
 
-	    if (frame_idx > skipframes)
+	    if ((frame_idx > skipframes) && ___playing())
 		trackbar.value = frame_idx + 1;
         }
+
+	function ___playing() {
+	    return ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
+	}
 
         fname = WebUtil.getQueryVar('data', null);
         if (fname) {
@@ -158,6 +162,12 @@
 	    message("Stopped at the " + frame_idx + " frame!");
 	}
 
+	function ___stop() {
+	    __stop();
+	    start_btn.disabled = false;
+	    trackBar.disabled = false;
+	}
+
 	function __continue() {
 	    start_btn.value = 'Stop';
 	    vnc_status.textContent = "Continued";
@@ -209,6 +219,9 @@
 	}
 
 	function track_stop() {
+	    if (trackBar.disabled)
+		return;
+
 	    start_btn.disabled = true;
 	    //console.info("trackBar stats is " + trackbar_stats);
 	    trackbar_stats = trackBarStats.DOWN;
@@ -220,6 +233,9 @@
 	}
 
 	function track_move() {
+	    if (trackBar.disabled)
+		return;
+
 	    //console.info("trackBar stats is " + trackbar_stats);
 	    if ((trackbar_stats === trackBarStats.DOWN) || (trackbar_stats === trackBarStats.MOVE)) {
 		if ((play_stats === playStats.STOPPED) || (play_stats === playStats.FINISH)) {
@@ -230,14 +246,19 @@
 	}
 
 	function track_start() {
+	    if (trackBar.disabled)
+		return;
+
 	    //console.info("trackBar stats is " + trackbar_stats);
 	    track_move();
+
+	    trackBar.disabled = true;
+	    trackbar_stats = trackBarStats.UP;
 	    message("Start track_start()");
+	    //console.info("jumpto.value is " + jumpto.value + " trackbar.value is " + trackbar.value);
 	    if (frame_idx > jumpto.value)
 		finish();
 	    start();
-	    trackbar_stats = trackBarStats.UP;
-	    trackBar.disabled = true;
 	}
 
         function finish() {
@@ -256,6 +277,12 @@
             start_btn.value = "Start";
             vnc_status.textContent = "Finished";
         }
+
+	function ___finish() {
+	    start_btn.disabled = false;
+	    trackBar.disabled = false;
+	    finish();
+	}
 
         window.onscriptsload = function () {
             iterations = WebUtil.getQueryVar('iterations', 1);

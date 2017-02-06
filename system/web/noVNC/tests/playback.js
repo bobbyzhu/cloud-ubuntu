@@ -102,9 +102,7 @@ next_iteration = function () {
 
     iteration += 1;
     if (iteration > iterations) {
-	start_btn.disabled = false;
-	trackBar.disabled = false;
-        finish();
+	___finish();
         return;
     }
 
@@ -123,7 +121,7 @@ next_iteration = function () {
 };
 
 end_iteration = function () {
-    updatestats(iteration, frame_idx);
+    ___updatestats(iteration, frame_idx);
 
     if (rfb._display.pending()) {
         rfb._display.set_onFlush(function () {
@@ -141,7 +139,7 @@ end_iteration = function () {
 queue_next_packet = function () {
     var frame, foffset;
 
-    updatestats(iteration, frame_idx);
+    ___updatestats(iteration, frame_idx);
 
     if (test_state !== 'running') { return; }
 
@@ -169,9 +167,7 @@ queue_next_packet = function () {
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
         mode = 'realtime';
 
-	__stop();
-	start_btn.disabled = false;
-	trackBar.disabled = false;
+	___stop();
 
 	foffset = frame.slice(1, frame.indexOf('{', 1));
 	toffset = foffset - 100;
@@ -196,10 +192,10 @@ queue_next_packet = function () {
             delay = 1;
         }
 
-        if ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
+        if (___playing())
             setTimeout(do_packet, delay);
     } else {
-        if ((play_stats !== playStats.STOPPED) && (play_stats != playStats.FINISH))
+        if (___playing())
             window.setImmediate(do_packet);
     }
 };
