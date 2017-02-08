@@ -105,6 +105,8 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
         self.verbose = getattr(server, "verbose", False)
         self.daemon = getattr(server, "daemon", False)
         self.record = getattr(server, "record", False)
+        self.record_dir = getattr(server, "record_dir", "recordings/")
+        self.record_list = getattr(server, "record_list", "records.html")
         self.run_once = getattr(server, "run_once", False)
         self.public = getattr(server, "public", False)
         self.rec        = None
@@ -530,7 +532,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                     self.record = record_file
                 elif not self.record:
                     self.record = "vnc.record.data"
-                self.record = os.path.abspath("recordings/" + self.record)
+                self.record = os.path.abspath(self.record_dir + self.record)
 
                 if record == "1" and 'record_title' in args and len(args['record_title']):
                      record_title = args['record_title'][0].rstrip('\n')
@@ -597,23 +599,23 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             self.rec.write("'EOF'];\n")
             self.rec.close()
 
-            records = open(os.path.abspath("recordings/records.html"),'w+')
+            records = open(os.path.abspath(self.record_dir + self.record_list),'w+')
             content = "<html>"
             content += "<head><style style='text/css'> a { text-decoration: none; outline: none; } </style></head>"
             content += "<body><ol>"
 
-            rec_list = os.listdir(os.path.abspath("recordings/"))
+            rec_list = os.listdir(os.path.abspath(self.record_dir))
             for rec in rec_list:
-                if (rec == "records.html"):
+                if (rec == self.record_list):
                     continue;
-                t = open(os.path.abspath("recordings/" + rec))
+                t = open(os.path.abspath(self.record_dir + rec))
                 m = re.match(r"var VNC_frame_title = '(.*)';", t.readline())
                 if m and len(m.groups()):
                     title = m.group(1)
                 else:
                     title = rec
                 play_url = "/play.html?data=" + rec
-                down_url = "/recordings/" + rec
+                down_url = "/" + self.record_dir + rec
                 content += "<li>&nbsp;&nbsp;<a href='"+ play_url +"' target='_top' title='play'> &gt; </a> "
                 content += "&nbsp;&nbsp;<a href=" + down_url + " target='_blank' title='download'> v </a>"
                 content += "&nbsp;&nbsp;&nbsp;&nbsp;" + title + "</li>\n"
@@ -657,7 +659,7 @@ class WebSocketServer(object):
     def __init__(self, RequestHandlerClass, listen_host='',
                  listen_port=None, source_is_ipv6=False,
             verbose=False, cert='', key='', ssl_only=None,
-            daemon=False, record='', web='',
+            daemon=False, record='', record_dir='recordings/', record_list='records.html', web='',
             file_only=False,
             run_once=False, public=False, timeout=0, idle_timeout=0, traffic=False,
             tcp_keepalive=True, tcp_keepcnt=None, tcp_keepidle=None,
@@ -678,6 +680,8 @@ class WebSocketServer(object):
         self.traffic        = traffic
         self.file_only      = file_only
         self.strict_mode    = strict_mode
+        self.record_dir     = record_dir
+        self.record_list    = record_list
 
         self.launch_time    = time.time()
         self.ws_connection  = False
