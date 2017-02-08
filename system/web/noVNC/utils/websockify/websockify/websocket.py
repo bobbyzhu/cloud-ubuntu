@@ -531,6 +531,11 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                     self.record = "vnc.record.data"
                 self.record = os.path.abspath("recordings/" + self.record);
 
+                if record == "1" and 'record_title' in args and len(args['record_title']):
+                     record_title = args['record_title'][0].rstrip('\n')
+                else:
+                     record_title = "Give me a title"
+
             if self.record:
                 # Record raw frame data as JavaScript array
                 record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()));
@@ -540,6 +545,9 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                 self.rec = open(fname, 'w+')
                 encoding = "binary"
                 if self.base64: encoding = "base64"
+                if record_title:
+                    self.rec.write("var VNC_frame_title = '%s';\n"
+                               % record_title)
                 self.rec.write("var VNC_frame_encoding = '%s';\n"
                                % encoding)
                 self.rec.write("var VNC_frame_data = [\n")

@@ -168,6 +168,7 @@ var UI;
             UI.initSetting('token', '');
             UI.initSetting('record', false);
             UI.initSetting('record_file', '');
+            UI.initSetting('record_title', '');
         },
 
         setupWindowEvents: function() {
@@ -413,6 +414,7 @@ var UI;
             document.getElementById('noVNC_setting_view_only').disabled = UI.connected;
             document.getElementById('noVNC_setting_record').disabled = UI.connected;
             document.getElementById('noVNC_setting_record_file').disabled = UI.connected;
+            document.getElementById('noVNC_setting_record_title').disabled = UI.connected;
             document.getElementById('noVNC_setting_path').disabled = UI.connected;
             document.getElementById('noVNC_setting_repeaterID').disabled = UI.connected;
 
@@ -752,6 +754,7 @@ var UI;
 
             UI.saveSetting('record');
             UI.saveSetting('record_file');
+            UI.saveSetting('record_title');
 
             // Settings with immediate (non-connected related) effect
             WebUtil.selectStylesheet(UI.getSetting('stylesheet'));
@@ -969,6 +972,7 @@ var UI;
             var token = document.getElementById('noVNC_setting_token').value;
             var record = document.getElementById('noVNC_setting_record').checked ? 1 : 0;
             var record_file = document.getElementById('noVNC_setting_record_file').value;
+            var record_title = document.getElementById('noVNC_setting_record_title').value;
             var path = document.getElementById('noVNC_setting_path').value;
 
             //if token is in path then ignore the new token variable
@@ -979,6 +983,9 @@ var UI;
                 path = WebUtil.injectParamIfMissing(path, "record", record);
                 if (record_file) {
                     path = WebUtil.injectParamIfMissing(path, "record_file", record_file);
+                }
+                if (record_title) {
+                    path = WebUtil.injectParamIfMissing(path, "record_title", record_title);
                 }
             }
 
