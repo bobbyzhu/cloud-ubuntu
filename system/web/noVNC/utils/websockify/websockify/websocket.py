@@ -24,8 +24,7 @@ try:
 except:
     from cgi import parse_qs
     from urlparse import urlparse
-import re
-from os.path import getsize
+from records import *
 
 # Imports that vary by python version
 
@@ -614,48 +613,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             self.rec.write("'EOF'];\n")
             self.rec.close()
 
-            records = open(os.path.abspath(self.record_dir + self.record_list),'w+')
-            content = "<html>"
-            content += "<head><style style='text/css'> a { text-decoration: none; outline: none; } </style></head>"
-            content += "<body><ol>"
-
-            rec_list = os.listdir(os.path.abspath(self.record_dir))
-            # sort by time
-            rec_list.sort(self.compare)
-
-            for rec in rec_list:
-                if (rec == self.record_list):
-                    continue;
-
-                f = os.path.abspath(self.record_dir + rec)
-                t = open(f)
-                m = re.match(r"var VNC_frame_title = '(.*)';", t.readline())
-                t.close()
-                if m and len(m.groups()):
-                    title = m.group(1)
-                else:
-                    title = rec
-
-                rec_size = os.path.getsize(f)
-                unit = " B"
-                if rec_size > 1024:
-                    rec_size = round(rec_size / 1024.0, 2)
-                    unit = " KB"
-
-                if rec_size > 1024:
-                    rec_size = round(rec_size / 1024.0, 2)
-                    unit = " MB"
-
-                play_url = "/play.html?data=" + rec
-                down_url = "/" + self.record_dir + rec
-                content += "<li>&nbsp;&nbsp;<a href='"+ play_url +"' target='_top' title='play'> &gt; </a> "
-                content += "&nbsp;&nbsp;<a href=" + down_url + " target='_blank' title='download'> v </a>"
-                content += "&nbsp;&nbsp;&nbsp;&nbsp;" + title + "&nbsp;&nbsp;(" + str(rec_size) + unit + ")</li>\n"
-
-            content += "</ol></body></html>"
-            records.write(content);
-            records.close();
-
+            Records(self.record_dir, self.record_list).generate()
             self.log_message("create " + self.record_dir + self.record_list);
 
     def handle(self):
