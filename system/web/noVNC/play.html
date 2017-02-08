@@ -58,6 +58,9 @@
                     <td><div id="VNC_status">Loading</div></td>
                 </tr></table>
             </div>
+            <div id="VNC_records" style="display: none;">
+                <iframe src="/recordings/records.html" width="300" height="300" style="text-align: center; border: 0;"></iframe>
+            </div>
         </div>
     </body>
 
@@ -99,6 +102,7 @@
 	var fidx = document.getElementById('frame_idx');
 	var session = document.getElementById('session');
 	var vnc_status = document.getElementById('VNC_status');
+	var vnc_records = document.getElementById('VNC_records');
 	var start_btn = document.getElementById('startButton');
 	var begin_btn = document.getElementById('beginButton');
 	var end_btn = document.getElementById('endButton');
@@ -166,6 +170,7 @@
 	    fname = tmp;
         } else {
             vnc_status.textContent = 'Must specify data=FOO in query string.';
+            vnc_records.style.display = "inline-block";
             message("Must specify data=FOO in query string.");
         }
 
@@ -182,6 +187,7 @@
 
         function __start() {
 	    start_btn.value = "||";
+            vnc_records.style.display = "none";
 	    vnc_status.textContent = "Running";
             message("Start play the " + skipframes + " Frame");
 
@@ -445,6 +451,7 @@
             play_stats = playStats.FINISH;
             start_btn.value = "=>";
             vnc_status.textContent = "Finished";
+            vnc_records.style.display = "inline-block";
         }
 
 	function ___finish() {

@@ -24,6 +24,7 @@ try:
 except:
     from cgi import parse_qs
     from urlparse import urlparse
+import re
 
 # Imports that vary by python version
 
@@ -529,7 +530,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                     self.record = record_file
                 elif not self.record:
                     self.record = "vnc.record.data"
-                self.record = os.path.abspath("recordings/" + self.record);
+                self.record = os.path.abspath("recordings/" + self.record)
 
                 if record == "1" and 'record_title' in args and len(args['record_title']):
                      record_title = args['record_title'][0].rstrip('\n')
@@ -538,7 +539,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
 
             if self.record:
                 # Record raw frame data as JavaScript array
-                record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()));
+                record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()))
                 fname = "%s.%s.%s" % (self.record, record_time, self.handler_id)
 
                 self.log_message("opening record file: %s", fname)
@@ -595,6 +596,29 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
         if self.rec:
             self.rec.write("'EOF'];\n")
             self.rec.close()
+
+            records = open(os.path.abspath("recordings/records.html"),'w+')
+            content = "<html><body><ol>"
+            content += "<h2>VNC records list</h2>"
+
+            rec_list = os.listdir(os.path.abspath("recordings/"))
+            for rec in rec_list:
+                if (rec == "records.html"):
+                    continue;
+                t = open(os.path.abspath("recordings/" + rec))
+                m = re.match(r"var VNC_frame_title = '(.*)';", t.readline())
+                if m and len(m.groups()):
+                    title = m.group(1)
+                else:
+                    title = rec
+                url = "/play.html?data=" + rec
+                content += "<li><a href='"+ url +"' target='_top'>" + title +"</a></li>\n"
+
+            content += "</ol></body></html>"
+            records.write(content);
+            records.close();
+
+            self.log_message("create records.html ");
 
     def handle(self):
         # When using run_once, we have a single process, so
