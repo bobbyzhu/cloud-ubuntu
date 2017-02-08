@@ -166,6 +166,8 @@ var UI;
             UI.initSetting('path', 'websockify');
             UI.initSetting('repeaterID', '');
             UI.initSetting('token', '');
+            UI.initSetting('record', false);
+            UI.initSetting('record_file', '');
         },
 
         setupWindowEvents: function() {
@@ -409,6 +411,8 @@ var UI;
             document.getElementById('noVNC_setting_resize').disabled = UI.connected;
             document.getElementById('noVNC_setting_shared').disabled = UI.connected;
             document.getElementById('noVNC_setting_view_only').disabled = UI.connected;
+            document.getElementById('noVNC_setting_record').disabled = UI.connected;
+            document.getElementById('noVNC_setting_record_file').disabled = UI.connected;
             document.getElementById('noVNC_setting_path').disabled = UI.connected;
             document.getElementById('noVNC_setting_repeaterID').disabled = UI.connected;
 
@@ -746,6 +750,9 @@ var UI;
             UI.saveSetting('stylesheet');
             UI.saveSetting('logging');
 
+            UI.saveSetting('record');
+            UI.saveSetting('record_file');
+
             // Settings with immediate (non-connected related) effect
             WebUtil.selectStylesheet(UI.getSetting('stylesheet'));
             WebUtil.init_logging(UI.getSetting('logging'));
@@ -960,11 +967,19 @@ var UI;
             var port = document.getElementById('noVNC_setting_port').value;
             var password = document.getElementById('noVNC_setting_password').value;
             var token = document.getElementById('noVNC_setting_token').value;
+            var record = document.getElementById('noVNC_setting_record').checked ? 1 : 0;
+            var record_file = document.getElementById('noVNC_setting_record_file').value;
             var path = document.getElementById('noVNC_setting_path').value;
 
             //if token is in path then ignore the new token variable
             if (token) {
                 path = WebUtil.injectParamIfMissing(path, "token", token);
+            }
+            if (record) {
+                path = WebUtil.injectParamIfMissing(path, "record", record);
+                if (record_file) {
+                    path = WebUtil.injectParamIfMissing(path, "record_file", record_file);
+                }
             }
 
             if ((!host) || (!port)) {

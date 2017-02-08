@@ -19,6 +19,11 @@ as taken from http://docs.python.org/dev/library/ssl.html#certificates
 import os, sys, time, errno, signal, socket, select, logging
 import array, struct
 from base64 import b64encode, b64decode
+try:
+    from urllib.parse import parse_qs, urlparse
+except:
+    from cgi import parse_qs
+    from urlparse import urlparse
 
 # Imports that vary by python version
 
@@ -516,10 +521,21 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             if self.path != '/':
                 self.log_message("%s: Path: '%s'", client_addr, self.path)
 
+            args = parse_qs(urlparse(self.path)[4]) # 4 is the query from url
+            if 'record' in args and len(args['record']):
+                record = args['record'][0].rstrip('\n')
+                if record == "1" and 'record_file' in args and len(args['record_file']):
+                    record_file = args['record_file'][0].rstrip('\n')
+                    self.record = record_file
+                elif not self.record:
+                    self.record = "vnc.record.data"
+                self.record = os.path.abspath("recordings/" + self.record);
+
             if self.record:
                 # Record raw frame data as JavaScript array
-                fname = "%s.%s" % (self.record,
-                                   self.handler_id)
+                record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()));
+                fname = "%s.%s.%s" % (self.record, record_time, self.handler_id)
+
                 self.log_message("opening record file: %s", fname)
                 self.rec = open(fname, 'w+')
                 encoding = "binary"

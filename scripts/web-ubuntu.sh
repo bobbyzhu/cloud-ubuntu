@@ -35,6 +35,7 @@ source ${TOP_DIR}/config $* >/dev/null 2>&1
 [ -n "$UNIX_PWD" ] && UNIX_PWD=`echo -n $UNIX_PWD | $ENCRYPT_CMD | cut -d' ' -f1`
 [ -n "$VNC_PWD" ] && VNC_PWD=`echo -n $VNC_PWD | $ENCRYPT_CMD | cut -d' ' -f1`
 [ -z "$VNC_RECORD" ] && VNC_RECORD=0
+[ -z "$VNC_MOUNT" ] && VNC_MOUNT=0
 [ -z "$VNC_PLAYER" ] && VNC_PLAYER=0
 [ -z "$VNC_TIMEOUT" ] && VNC_TIMEOUT=0
 [ -z "$VNC_PUBLIC" ] && VNC_PUBLIC=0
@@ -43,6 +44,10 @@ source ${TOP_DIR}/config $* >/dev/null 2>&1
 [ -z "$GATEONE_PUBLIC" ] && GATEONE_PUBLIC=""
 
 if [ $VNC_RECORD -eq 1 -o $VNC_PLAYER -eq 1 ]; then
+    VNC_MOUNT=1
+fi
+
+if [ $VNC_MOUNT -eq 1 ]; then
     VNC_RECORD_DIR=/noVNC/recordings
     VNC_RECORD_FILE=$VNC_RECORD_DIR/vnc.record.data
     LOCAL_RECORD_DIR=$TOP_DIR/$VNC_RECORD_DIR
