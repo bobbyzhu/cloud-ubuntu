@@ -525,6 +525,12 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                 self.log_message("%s: Path: '%s'", client_addr, self.path)
 
             args = parse_qs(urlparse(self.path)[4]) # 4 is the query from url
+
+            record_title = ""
+            record_author = ""
+            record_tags = ""
+            record_desc = ""
+
             if 'record' in args and len(args['record']):
                 record = args['record'][0].rstrip('\n')
                 if record == "1" and 'record_file' in args and len(args['record_file']):
@@ -534,16 +540,28 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                     self.record = "vnc.record.data"
                 self.record = os.path.abspath(self.record_dir + self.record)
 
-                if record == "1" and 'record_title' in args and len(args['record_title']):
-                     record_title = args['record_title'][0].rstrip('\n')
-                else:
-                     record_title = ""
+                if record == "1":
+                     if 'record_title' in args and len(args['record_title']):
+                         record_title = args['record_title'][0].rstrip('\n')
+
+                     if 'record_author' in args and len(args['record_author']):
+                         record_author = args['record_author'][0].rstrip('\n')
+
+                     if 'record_tags' in args and len(args['record_tags']):
+                         record_tags = args['record_tags'][0].rstrip('\n')
+
+                     if 'record_desc' in args and len(args['record_desc']):
+                         record_desc = args['record_desc'][0].rstrip('\n')
 
             if self.record:
                 self.log_message("Recording to '%s.*'", self.record)
+
                 # Record raw frame data as JavaScript array
-                record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()))
-                fname = "%s.%s.%s" % (self.record, record_time, self.handler_id)
+                cur_time = time.localtime(time.time())
+                fname_time = time.strftime("%Y%m%d.%H%M%S", cur_time)
+                record_time = time.strftime("%a, %d %b %Y %H:%M:%S %Z", cur_time)
+
+                fname = "%s.%s.%s" % (self.record, fname_time, self.handler_id)
 
                 if not os.path.exists(self.record_dir):
                     os.makedirs(self.record_dir)
@@ -552,9 +570,23 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                 self.rec = open(fname, 'w+')
                 encoding = "binary"
                 if self.base64: encoding = "base64"
+
+                if record_time:
+                    self.rec.write("var VNC_frame_time = '%s';\n"
+                               % record_time)
                 if record_title:
                     self.rec.write("var VNC_frame_title = '%s';\n"
                                % record_title)
+                if record_author:
+                    self.rec.write("var VNC_frame_author = '%s';\n"
+                               % record_author)
+                if record_tags:
+                    self.rec.write("var VNC_frame_tags = '%s';\n"
+                               % record_tags)
+                if record_desc:
+                    self.rec.write("var VNC_frame_desc = '%s';\n"
+                               % record_desc)
+
                 self.rec.write("var VNC_frame_encoding = '%s';\n"
                                % encoding)
                 self.rec.write("var VNC_frame_data = [\n")
