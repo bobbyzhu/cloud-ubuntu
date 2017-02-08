@@ -83,6 +83,9 @@
     <script src="./app/webutil.js"></script>
 
     <script>
+        // skip drawing if (skipframes - frame_idx) is big
+        // draw a text to tell users wait instead.
+        var frames_delta = 200;
 	// play Stats
         var playStats = {
 	    INIT: 0,
@@ -312,7 +315,7 @@
 
             mode = 'fullspeed';
 
-            if (skipframes - frame_idx > 0) {
+            if (skipframes - frame_idx > frames_delta) {
                 vnc_canvas.style.display = 'none';
                 vnc_canvas_backup.style.display = 'inline-block';
                 vnc_status.textContent = "Fast Continued...";
@@ -572,6 +575,7 @@
         window.onscriptsload = function () {
             iterations = WebUtil.getQueryVar('iterations', 1);
             skipframes = WebUtil.getQueryVar('skipframes', 0);
+            frames_delta = WebUtil.getQueryVar('delta', frames_delta);
             messageon = WebUtil.getQueryVar('message', 0);
 
 	    screen_width = WebUtil.getQueryVar('width', 0);
