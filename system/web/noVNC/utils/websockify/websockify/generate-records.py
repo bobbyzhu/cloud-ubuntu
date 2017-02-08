@@ -11,7 +11,14 @@ sys.path.append(mypath)
 from records import *
 
 def main():
-    r = Records(record_dir = "noVNC/recordings/")
+    record_dir = ""
+    if len(sys.argv) > 1:
+        record_dir = sys.argv[1]
+    if not record_dir:
+        record_dir = mypath + "../../../../../../../" + "noVNC/recordings/"
+    record_dir = os.path.abspath(record_dir) + "/"
+
+    r = Records(record_dir)
 
     r.generate()
 
