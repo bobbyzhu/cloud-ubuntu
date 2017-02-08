@@ -25,7 +25,9 @@ class Records:
                   "<style style='text/css'>\n" \
                   "    a { text-decoration: none; outline: none; }\n" \
                   "    table { border: 1px solid #333; border-spacing: 0; border-collapse: collapse; }\n" \
-                  "    th, td { border: 1px solid #aaa; display: table-cell; text-align: center; max-width: 100px; }\n" \
+                  "    th, td { padding-left: 2px; padding-right: 2px; padding-top: 10px; padding-bottom: 10px;" \
+                  "             border: 1px solid #aaa; display: table-cell; " \
+                  "             text-align: center; max-width: 100px; }\n" \
                   "    td { font-size: 80%; overflow: hidden; text-overflow: ellipsis } \n" \
                   "    tr.head { background-color: #ccc; } \n" \
                   "    tr.odd { background-color: #eee } \n" \
@@ -46,7 +48,7 @@ class Records:
                    "    <th>%s</th>\n" \
                    "    <th>%s</th>\n" \
                    "  </tr>\n" \
-                   % ("", "Play", "Down", "Title", "Size",
+                   % ("No.", "Play", "Down", "Title", "Size",
                      "Time", "Author", "Tags", "Desc")
    
         rec_list = os.listdir(os.path.abspath(self.record_dir))
