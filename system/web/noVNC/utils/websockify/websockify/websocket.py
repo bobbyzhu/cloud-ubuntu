@@ -25,6 +25,7 @@ except:
     from cgi import parse_qs
     from urlparse import urlparse
 import re
+from os.path import getsize
 
 # Imports that vary by python version
 
@@ -537,7 +538,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                 if record == "1" and 'record_title' in args and len(args['record_title']):
                      record_title = args['record_title'][0].rstrip('\n')
                 else:
-                     record_title = "Give me a title"
+                     record_title = ""
 
             if self.record:
                 self.log_message("Recording to '%s.*'", self.record)
@@ -598,6 +599,16 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
         else:
             SimpleHTTPRequestHandler.do_HEAD(self)
 
+    def compare(self, x, y):
+        stat_x = os.stat(self.record_dir + "/" + x)
+        stat_y = os.stat(self.record_dir + "/" + y)
+        if (stat_x.st_ctime > stat_y.st_ctime):
+            return -1
+        elif (stat_x.st_ctime > stat_y.st_ctime):
+            return 1
+        else:
+            return 0
+
     def finish(self):
         if self.rec:
             self.rec.write("'EOF'];\n")
@@ -609,20 +620,37 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             content += "<body><ol>"
 
             rec_list = os.listdir(os.path.abspath(self.record_dir))
+            # sort by time
+            rec_list.sort(self.compare)
+
             for rec in rec_list:
                 if (rec == self.record_list):
                     continue;
-                t = open(os.path.abspath(self.record_dir + rec))
+
+                f = os.path.abspath(self.record_dir + rec)
+                t = open(f)
                 m = re.match(r"var VNC_frame_title = '(.*)';", t.readline())
+                t.close()
                 if m and len(m.groups()):
                     title = m.group(1)
                 else:
                     title = rec
+
+                rec_size = os.path.getsize(f)
+                unit = " B"
+                if rec_size > 1024:
+                    rec_size = round(rec_size / 1024.0, 2)
+                    unit = " KB"
+
+                if rec_size > 1024:
+                    rec_size = round(rec_size / 1024.0, 2)
+                    unit = " MB"
+
                 play_url = "/play.html?data=" + rec
                 down_url = "/" + self.record_dir + rec
                 content += "<li>&nbsp;&nbsp;<a href='"+ play_url +"' target='_top' title='play'> &gt; </a> "
                 content += "&nbsp;&nbsp;<a href=" + down_url + " target='_blank' title='download'> v </a>"
-                content += "&nbsp;&nbsp;&nbsp;&nbsp;" + title + "</li>\n"
+                content += "&nbsp;&nbsp;&nbsp;&nbsp;" + title + "&nbsp;&nbsp;(" + str(rec_size) + unit + ")</li>\n"
 
             content += "</ol></body></html>"
             records.write(content);
