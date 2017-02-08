@@ -24,9 +24,9 @@ class Records:
                   "<title>noVNC Recordings</title>\n" \
                   "<style style='text/css'>\n" \
                   "    a { text-decoration: none; outline: none; }\n" \
-                  "    table { border: 1px solid #333; border-spacing: 0; border-collapse: collapse; }\n" \
-                  "    th, td { padding-left: 2px; padding-right: 2px; padding-top: 10px; padding-bottom: 10px;" \
-                  "             border: 1px solid #aaa; display: table-cell; " \
+                  "    table { border: 1px solid #333; border-spacing: 0; border-collapse: collapse; width: 100%; }\n" \
+                  "    th, td { padding-left: 2px; padding-right: 2px; padding-top: 10px; padding-bottom: 10px;\n" \
+                  "             border: 1px solid #aaa; display: table-cell; \n" \
                   "             text-align: center; max-width: 100px; }\n" \
                   "    td { font-size: 80%; overflow: hidden; text-overflow: ellipsis } \n" \
                   "    tr.head { background-color: #ccc; } \n" \
