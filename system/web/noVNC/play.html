@@ -243,8 +243,11 @@
                 return;
 
             mode = 'fullspeed';
-            document.getElementById('VNC_canvas').style.display = 'none';
-            vnc_status.textContent = "Fast Continued...";
+
+            if (skipframes - frame_idx > 200) {
+                document.getElementById('VNC_canvas').style.display = 'none';
+                vnc_status.textContent = "Fast Continued...";
+            }
 
             start_btn.disabled = true;
             begin_btn.disabled = true;
