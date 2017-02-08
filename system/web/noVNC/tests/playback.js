@@ -109,8 +109,7 @@ next_iteration = function () {
 
     frame_idx = 0;
 
-    if ((skipframes > 0) && (mode === 'realtime'))
-        mode = 'fullspeed';
+    ___speedup();
 
     istart_time = (new Date()).getTime();
     rfb.connect('test', 0, "bogus");
@@ -159,13 +158,9 @@ queue_next_packet = function () {
         return;
     }
 
-    if ((frame_idx < skipframes) && (mode === 'realtime'))
-        mode = 'fullspeed';
+    ___speedup();
 
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
-        mode = 'realtime';
-
-        ___updatestats(iteration, frame_idx);
 	___stop();
 
 	foffset = frame.slice(1, frame.indexOf('{', 1));

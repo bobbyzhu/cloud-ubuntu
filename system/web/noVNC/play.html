@@ -203,6 +203,9 @@
             //recv_message = rfb.testMode(send_array, VNC_frame_encoding);
 
             play_stats = playStats.RUNNING;
+
+            ___speedup();
+
             next_iteration();
         }
 
@@ -215,6 +218,8 @@
 	}
 
 	function ___stop() {
+            mode = 'realtime';
+            ___updatestats(iteration, frame_idx);
 	    __stop();
 	    __resume();
 	}
@@ -229,11 +234,31 @@
 
 	    skipframes = 0;
 	    prev_track_value = frame_idx_max;
+            document.getElementById('VNC_canvas').style.display = 'inline-block';
+            vnc_status.textContent = "Continued";
 	}
+
+        function ___speedup() {
+            if (!(skipframes > frame_idx))
+                return;
+
+            mode = 'fullspeed';
+            document.getElementById('VNC_canvas').style.display = 'none';
+            vnc_status.textContent = "Fast Continued...";
+
+            start_btn.disabled = true;
+            begin_btn.disabled = true;
+            end_btn.disabled = true;
+            plus_btn.disabled = true;
+            minus_btn.disabled = true;
+            track_bar.disabled = true;
+        }
 
 	function __continue() {
 	    start_btn.value = "||";
 	    vnc_status.textContent = "Continued";
+
+            ___speedup();
 
 	    if (mode === 'fullspeed') {
 		window.setImmediate(do_packet);
@@ -242,15 +267,12 @@
 	        istart_time = (new Date()).getTime() - toffset;
 	    }
 
-	    if ((frame_idx < skipframes) && (mode === 'realtime'))
-	        mode = 'fullspeed';
-
 	    play_stats = playStats.RUNNING;
 	    message("Continue play the " + frame_idx + " frame!");
 	}
 
 	function start() {
-            if (mode1.checked || (skipframes > frame_idx)) {
+            if (mode1.checked) {
                 message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
                 mode = 'fullspeed';
             } else {
@@ -259,16 +281,6 @@
             }
 
 	    if (play_stats != playStats.RUNNING) {
-
-	        if (mode === "fullspeed") {
-		    start_btn.disabled = true;
-		    begin_btn.disabled = true;
-		    end_btn.disabled = true;
-		    plus_btn.disabled = true;
-		    minus_btn.disabled = true;
-		    track_bar.disabled = true;
-	        }
-
 		if (play_stats === playStats.STOPPED)
 		    __continue();
 		else
