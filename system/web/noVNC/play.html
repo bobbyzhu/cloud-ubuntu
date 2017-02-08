@@ -493,8 +493,13 @@
 	}
 
 	window.onresize = function() {
-	   __screenSize();
+	    __screenSize();
 	}
+
+        window.onblur = function() {
+            if (!(skipframes > frame_idx))
+                __stop();
+        }
 
 	document.onkeydown = function(e) {
 	    if (track_bar.disabled || (mode === "fullspeed"))
