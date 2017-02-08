@@ -28,7 +28,10 @@
 	<h1><a href="http://tinylab.org" target="_blank" title="Subproject of Cloud Lab (github.com/tinyclub/cloud-lab), based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
 
         <div id="VNC_control">
-	    <div><a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span></div><br>
+	    <div><a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span>&nbsp;&nbsp;<a onclick="show_records();">#more...</a></div><br>
+            <div id="VNC_records" style="display: none;">
+                <iframe src="/recordings/records.html" width="500" height="300" style="text-align: center"></iframe>
+            </div><br>
 
 	    <input id='startButton' type='button' value='=>' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
@@ -57,9 +60,6 @@
                 <table border=0 width=100%><tr>
                     <td><div id="VNC_status">Loading</div></td>
                 </tr></table>
-            </div>
-            <div id="VNC_records" style="display: none;">
-                <iframe src="/recordings/records.html" width="300" height="300" style="text-align: center; border: 0;"></iframe>
             </div>
         </div>
     </body>
@@ -120,6 +120,14 @@
 	frame_idx_max = 0;
 	totalframes = 0;
 
+        function show_records() {
+            console.info("vnc records display " + vnc_records.style.display);
+            if (vnc_records.style.display === "none")
+                vnc_records.style.display = "inline-block";
+            else
+                vnc_records.style.display = "none";
+        }
+
 	function iters_update() {
 	    iterations = Number(iters.value);
 	    loop.textContent = iterations;
@@ -170,7 +178,6 @@
 	    fname = tmp;
         } else {
             vnc_status.textContent = 'Must specify data=FOO in query string.';
-            vnc_records.style.display = "inline-block";
             message("Must specify data=FOO in query string.");
         }
 
@@ -187,7 +194,6 @@
 
         function __start() {
 	    start_btn.value = "||";
-            vnc_records.style.display = "none";
 	    vnc_status.textContent = "Running";
             message("Start play the " + skipframes + " Frame");
 
@@ -451,7 +457,6 @@
             play_stats = playStats.FINISH;
             start_btn.value = "=>";
             vnc_status.textContent = "Finished";
-            vnc_records.style.display = "inline-block";
         }
 
 	function ___finish() {

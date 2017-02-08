@@ -598,8 +598,9 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             self.rec.close()
 
             records = open(os.path.abspath("recordings/records.html"),'w+')
-            content = "<html><body><ol>"
-            content += "<h2>VNC records list</h2>"
+            content = "<html>"
+            content += "<head><style style='text/css'> a { text-decoration: none; outline: none; } </style></head>"
+            content += "<body><ol>"
 
             rec_list = os.listdir(os.path.abspath("recordings/"))
             for rec in rec_list:
@@ -611,8 +612,11 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                     title = m.group(1)
                 else:
                     title = rec
-                url = "/play.html?data=" + rec
-                content += "<li><a href='"+ url +"' target='_top'>" + title +"</a></li>\n"
+                play_url = "/play.html?data=" + rec
+                down_url = "/recordings/" + rec
+                content += "<li>&nbsp;&nbsp;<a href='"+ play_url +"' target='_top' title='play'> &gt; </a> "
+                content += "&nbsp;&nbsp;<a href=" + down_url + " target='_blank' title='download'> v </a>"
+                content += "&nbsp;&nbsp;&nbsp;&nbsp;" + title + "</li>\n"
 
             content += "</ol></body></html>"
             records.write(content);
