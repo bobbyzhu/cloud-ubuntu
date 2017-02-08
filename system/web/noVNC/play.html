@@ -242,8 +242,10 @@
 	        istart_time = (new Date()).getTime() - toffset;
 	    }
 
-	    if ((frame_idx < skipframes) && (mode === 'realtime'))
+	    if ((frame_idx < skipframes) && (mode === 'realtime')) {
 	        mode = 'fullspeed';
+                rfb._display.set_skip_frames(true);
+            }
 
 	    play_stats = playStats.RUNNING;
 	    message("Continue play the " + frame_idx + " frame!");
@@ -253,6 +255,7 @@
             if (mode1.checked || (skipframes > frame_idx)) {
                 message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
                 mode = 'fullspeed';
+                rfb._display.set_skip_frames(true);
             } else {
                 message("Starting realtime playback [" + iterations + " iteration(s)]");
                 mode = 'realtime';

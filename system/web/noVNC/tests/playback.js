@@ -109,8 +109,10 @@ next_iteration = function () {
 
     frame_idx = 0;
 
-    if ((skipframes > 0) && (mode === 'realtime'))
+    if ((skipframes > 0) && (mode === 'realtime')) {
         mode = 'fullspeed';
+        rfb._display.set_skip_frames(true);
+    }
 
     istart_time = (new Date()).getTime();
     rfb.connect('test', 0, "bogus");
@@ -159,11 +161,14 @@ queue_next_packet = function () {
         return;
     }
 
-    if ((frame_idx < skipframes) && (mode === 'realtime'))
+    if ((frame_idx < skipframes) && (mode === 'realtime')) {
         mode = 'fullspeed';
+        rfb._display.set_skip_frames(true);
+    }
 
     if ((mode == 'fullspeed') && (skipframes > 0) && (frame_idx >= skipframes)) {
         mode = 'realtime';
+        rfb._display.set_skip_frames(false);
 
         ___updatestats(iteration, frame_idx);
 	___stop();
@@ -225,6 +230,7 @@ do_packet = function () {
         }
     }
     bytes_processed += u8.length;
+
     if (screen_width > 0 || screen_height > 0)
         rfb._display.autoscale(screen_width, screen_height, 1);
     //rfb._display.set_scale(0.6);
