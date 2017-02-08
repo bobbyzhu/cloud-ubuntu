@@ -24,6 +24,7 @@ try:
 except:
     from cgi import parse_qs
     from urlparse import urlparse
+import os
 
 class ProxyRequestHandler(websocket.WebSocketRequestHandler):
 
@@ -380,6 +381,10 @@ def websockify_init():
             help="per frame traffic")
     parser.add_option("--record",
             help="record sessions to FILE.[session_number]", metavar="FILE")
+    parser.add_option("--record-dir",
+            help="directoy to save recorded sessions", default='recordings/', metavar="DIR")
+    parser.add_option("--record-list",
+            help="file to save the list of recorded sessions", default='records.html', metavar="FILE")
     parser.add_option("--daemon", "-D",
             dest="daemon", action="store_true",
             help="become a daemon (background process)")
@@ -580,9 +585,13 @@ class LibProxyServer(ForkingMixIn, HTTPServer):
         # Configuration affecting base request handler
         self.only_upgrade   = not web
         self.verbose   = kwargs.pop('verbose', False)
+
         record = kwargs.pop('record', '')
+        record_dir = kwargs.pop('record_dir', '')
+        record_list = kwargs.pop('record_list', '')
         if record:
-            self.record = os.path.abspath(record)
+            self.record = record
+
         self.run_once  = kwargs.pop('run_once', False)
         self.public  = kwargs.pop('public', False)
         self.handler_id = 0

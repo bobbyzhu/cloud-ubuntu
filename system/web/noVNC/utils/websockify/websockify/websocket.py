@@ -540,9 +540,13 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
                      record_title = "Give me a title"
 
             if self.record:
+                self.log_message("Recording to '%s.*'", self.record)
                 # Record raw frame data as JavaScript array
                 record_time = time.strftime("%Y%m%d.%H%M%S", time.localtime(time.time()))
                 fname = "%s.%s.%s" % (self.record, record_time, self.handler_id)
+
+                if not os.path.exists(self.record_dir):
+                    os.makedirs(self.record_dir)
 
                 self.log_message("opening record file: %s", fname)
                 self.rec = open(fname, 'w+')
@@ -624,7 +628,7 @@ class WebSocketRequestHandler(SimpleHTTPRequestHandler):
             records.write(content);
             records.close();
 
-            self.log_message("create records.html ");
+            self.log_message("create " + self.record_dir + self.record_list);
 
     def handle(self):
         # When using run_once, we have a single process, so
@@ -702,7 +706,14 @@ class WebSocketServer(object):
         if web:
             self.web = os.path.abspath(web)
         if record:
-            self.record = os.path.abspath(record)
+            self.record = os.path.basename(record)
+            tmp = os.path.dirname(record)
+            if tmp:
+                self.record_dir = tmp + "/"
+            else:
+                self.record_dir = record_dir + "/"
+            self.record = os.path.abspath(self.record_dir + self.record)
+            self.record_list = record_list
 
         if self.web:
             os.chdir(self.web)
