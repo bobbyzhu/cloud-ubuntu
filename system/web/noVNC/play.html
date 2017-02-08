@@ -11,6 +11,9 @@
 	    div a { text-decoration: none; outline: none; }
 	    h1 a { text-decoration: none; outline: none; color:#000 }
 
+            #VNC_canvas { display: inline-block; }
+            #VNC_canvas_backup { display: none; }
+
 	    #minusButton,#plusButton,#beginButton,#endButton {
 		color: #aaa; display: none; margin-left: 5px; margin-right: 5px;
 	    }
@@ -56,6 +59,9 @@
             <canvas id="VNC_canvas" width="100%" height="20px">
                 Canvas not supported.
             </canvas>
+            <canvas id="VNC_canvas_backup" width="100%" height="20px">
+                Canvas not supported.
+            </canvas>
             <div id="VNC_status_bar" class="VNC_status_bar">
                 <table border=0 width=100%><tr>
                     <td><div id="VNC_status">Loading</div></td>
@@ -94,7 +100,7 @@
 	var track_bar_stats = trackBarStats.INIT;
 	var prev_track_value;
 
-        var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon;
+        var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon, canvas_imgdata;
 	var screen_width_input, screen_width, screen_height, screen_ratio;
 	var track_bar = document.getElementById('trackBar');
 	var cell = document.getElementById('messages');
@@ -102,6 +108,8 @@
 	var fidx = document.getElementById('frame_idx');
 	var session = document.getElementById('session');
 	var vnc_status = document.getElementById('VNC_status');
+	var vnc_canvas = document.getElementById('VNC_canvas');
+	var vnc_canvas_backup = document.getElementById('VNC_canvas_backup');
 	var vnc_records = document.getElementById('VNC_records');
 	var start_btn = document.getElementById('startButton');
 	var begin_btn = document.getElementById('beginButton');
@@ -119,6 +127,7 @@
 	prev_track_value = 0;
 	frame_idx_max = 0;
 	totalframes = 0;
+        canvas_imgdata = '';
 
         function show_records() {
             console.info("vnc records display " + vnc_records.style.display);
@@ -210,6 +219,8 @@
         }
 
 	function __stop() {
+            backup_canvas();
+            restore_canvas();
 	    play_stats = playStats.STOPPED;
 
 	    start_btn.value = '=>';
@@ -224,6 +235,62 @@
 	    __resume();
 	}
 
+        function backup_canvas() {
+            //console.info("backup canvas");
+
+            var w = vnc_canvas.width;
+            var h = vnc_canvas.height;
+
+            vnc_canvas_backup.width = w;
+            vnc_canvas_backup.height = h;
+
+            canvas_imgdata = rfb._display.get_context().getImageData(0, 0, w, h);
+        }
+
+        function __draw_text(canvas, w, h, str, font) {
+            if (canvas === vnc_canvas_backup)
+                ctx = vnc_canvas_backup.getContext('2d');
+            else
+                ctx = rfb._display.get_context();
+
+            if (!font)
+                font = "50px Verdana";
+
+            var gradient=ctx.createLinearGradient(0, 0, w, 0);
+            gradient.addColorStop("0","magenta");
+            gradient.addColorStop("0.5","blue");
+            gradient.addColorStop("1.0","red");
+
+            ctx.font = font;
+            ctx.textAlign = "center";
+            ctx.fillStyle = gradient;
+
+            var x = parseInt(w / 2);
+            var y = parseInt(h / 4);
+            ctx.fillText(str, x, y);
+        }
+
+        function draw_text(w, h, str, font) {
+            __draw_text(vnc_canvas, w, h, str, font);
+        }
+
+        function backup_draw_text(w, h, str, font) {
+            __draw_text(vnc_canvas_backup, w, h, str, font);
+        }
+
+        function restore_canvas() {
+            //console.info("restore canvas");
+
+            var w = vnc_canvas_backup.width;
+            var h = vnc_canvas_backup.height;
+
+            var ctx = vnc_canvas_backup.getContext('2d');
+            if (canvas_imgdata !== '')
+                ctx.putImageData(canvas_imgdata, 0, 0);
+
+            backup_draw_text(w, h, "Fast Forwarding, wait for a moment ...")
+        }
+
 	function __resume() {
 	    start_btn.disabled = false;
 	    begin_btn.disabled = false;
@@ -234,7 +301,8 @@
 
 	    skipframes = 0;
 	    prev_track_value = frame_idx_max;
-            document.getElementById('VNC_canvas').style.display = 'inline-block';
+            vnc_canvas_backup.style.display = 'none';
+            vnc_canvas.style.display = 'inline-block';
             vnc_status.textContent = "Continued";
 	}
 
@@ -244,8 +312,9 @@
 
             mode = 'fullspeed';
 
-            if (skipframes - frame_idx > 200) {
-                document.getElementById('VNC_canvas').style.display = 'none';
+            if (skipframes - frame_idx > 0) {
+                vnc_canvas.style.display = 'none';
+                vnc_canvas_backup.style.display = 'inline-block';
                 vnc_status.textContent = "Fast Continued...";
             }
 
