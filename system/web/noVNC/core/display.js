@@ -42,7 +42,6 @@
 
     Util.set_defaults(this, defaults, {
         'true_color': true,
-        'skip_frames': false,
         'colourMap': [],
         'scale': 1.0,
         'viewport': false,
@@ -209,31 +208,15 @@
             }
 
             // Copy the valid part of the viewport to the shifted location
-            this._drawImage(canvas, 0, 0, vp.w, vp.h, -deltaX, -deltaY, vp.w, vp.h);
+            this._drawCtx.drawImage(canvas, 0, 0, vp.w, vp.h, -deltaX, -deltaY, vp.w, vp.h);
 
             if (deltaX !== 0) {
-                this._fillRect(x1, 0, w, vp.h);
+                this._drawCtx.fillRect(x1, 0, w, vp.h);
             }
             if (deltaY !== 0) {
-                this._fillRect(0, y1, vp.w, h);
+                this._drawCtx.fillRect(0, y1, vp.w, h);
             }
             this._drawCtx.fillStyle = saveStyle;
-        },
-
-        _putImageData: function(img, x, y) {
-            if (!this._skip_frames)
-                this._drawCtx.putImageData(img, x, y);
-        },
-
-        _fillRect: function(x, y, w, h) {
-            if (!this._skip_frames)
-                this._drawCtx.fillRect(x, y, w, h);
-        },
-
-        // wrap ctx.drawImage but relative to viewport
-        _drawImage: function (img, x, y) {
-            if (!this._skip_frames)
-                this._drawCtx.drawImage(img, x - this._viewportLoc.x, y - this._viewportLoc.y);
         },
 
         viewportChangeSize: function(width, height) {
@@ -290,7 +273,7 @@
                     }
 
                     if (saveImg) {
-                        this._putImageData(saveImg, 0, 0);
+                        this._drawCtx.putImageData(saveImg, 0, 0);
                     }
                 }
             }
@@ -406,7 +389,7 @@
                 });
             } else {
                 this._setFillColor(color);
-                this._fillRect(x - this._viewportLoc.x, y - this._viewportLoc.y, width, height);
+                this._drawCtx.fillRect(x - this._viewportLoc.x, y - this._viewportLoc.y, width, height);
             }
         },
 
@@ -427,7 +410,7 @@
                 var x2 = new_x - this._viewportLoc.x;
                 var y2 = new_y - this._viewportLoc.y;
 
-                this._drawImage(this._target, x1, y1, w, h, x2, y2, w, h);
+                this._drawCtx.drawImage(this._target, x1, y1, w, h, x2, y2, w, h);
             }
         },
 
@@ -509,7 +492,7 @@
         // draw the current tile to the screen
         finishTile: function () {
             if (this._prefer_js) {
-                this._putImageData(this._tile, this._tile_x - this._viewportLoc.x,
+                this._drawCtx.putImageData(this._tile, this._tile_x - this._viewportLoc.x,
                                            this._tile_y - this._viewportLoc.y);
             }
             // else: No-op -- already done by setSubTile
@@ -583,10 +566,15 @@
         blitStringImage: function (str, x, y) {
             var img = new Image();
             img.onload = function () {
-                this._drawImage(img, x - this._viewportLoc.x, y - this._viewportLoc.y);
+                this._drawCtx.drawImage(img, x - this._viewportLoc.x, y - this._viewportLoc.y);
             }.bind(this);
             img.src = str;
             return img; // for debugging purposes
+        },
+
+        // wrap ctx.drawImage but relative to viewport
+        drawImage: function (img, x, y) {
+            this._drawCtx.drawImage(img, x - this._viewportLoc.x, y - this._viewportLoc.y);
         },
 
         changeCursor: function (pixels, mask, hotx, hoty, w, h) {
@@ -727,7 +715,7 @@
                 data[i + 2] = arr[j + 2];
                 data[i + 3] = 255;  // Alpha
             }
-            this._putImageData(img, x - vx, y - vy);
+            this._drawCtx.putImageData(img, x - vx, y - vy);
         },
 
         _bgrxImageData: function (x, y, vx, vy, width, height, arr, offset) {
@@ -739,7 +727,7 @@
                 data[i + 2] = arr[j];
                 data[i + 3] = 255;  // Alpha
             }
-            this._putImageData(img, x - vx, y - vy);
+            this._drawCtx.putImageData(img, x - vx, y - vy);
         },
 
         _rgbxImageData: function (x, y, vx, vy, width, height, arr, offset) {
@@ -751,7 +739,7 @@
                 img = this._drawCtx.createImageData(width, height);
                 img.data.set(new Uint8ClampedArray(arr.buffer, arr.byteOffset, width * height * 4));
             }
-            this._putImageData(img, x - vx, y - vy);
+            this._drawCtx.putImageData(img, x - vx, y - vy);
         },
 
         _cmapImageData: function (x, y, vx, vy, width, height, arr, offset) {
@@ -765,7 +753,7 @@
                 data[i + 2] = bgr[0];
                 data[i + 3] = 255;  // Alpha
             }
-            this._putImageData(img, x - vx, y - vy);
+            this._drawCtx.putImageData(img, x - vx, y - vy);
         },
 
         _renderQ_push: function (action) {
@@ -806,7 +794,7 @@
                         break;
                     case 'img':
                         if (a.img.complete) {
-                            this._drawImage(a.img, a.x, a.y);
+                            this.drawImage(a.img, a.x, a.y);
                         } else {
                             a.img._noVNC_display = this;
                             a.img.addEventListener('load', this._resume_renderQ);
@@ -834,7 +822,6 @@
         ['context', 'ro', 'raw'],      // Canvas 2D context for rendering (read-only)
         ['logo', 'rw', 'raw'],         // Logo to display when cleared: {"width": w, "height": h, "data": data}
         ['true_color', 'rw', 'bool'],  // Use true-color pixel data
-        ['skip_frames', 'rw', 'bool'],  // Skip some frames
         ['colourMap', 'rw', 'arr'],    // Colour map array (when not true-color)
         ['scale', 'rw', 'float'],      // Display area scale factor 0.0 - 1.0
         ['viewport', 'rw', 'bool'],    // Use viewport clipping
