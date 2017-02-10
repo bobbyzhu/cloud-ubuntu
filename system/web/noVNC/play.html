@@ -223,7 +223,6 @@
 
 	function __stop() {
             backup_canvas();
-            restore_canvas();
 	    play_stats = playStats.STOPPED;
 
 	    start_btn.value = '=>';
@@ -247,7 +246,13 @@
             vnc_canvas_backup.width = w;
             vnc_canvas_backup.height = h;
 
-            canvas_imgdata = rfb._display.get_context().getImageData(0, 0, w, h);
+            canvas_imgdata = vnc_canvas.getContext('2d').getImageData(0, 0, w, h);
+
+            var ctx = vnc_canvas_backup.getContext('2d');
+            if (canvas_imgdata !== '')
+                ctx.putImageData(canvas_imgdata, 0, 0);
+
+            backup_draw_text(w, h, "Fast Forwarding ...")
         }
 
         function __draw_text(canvas, w, h, str, font) {
@@ -260,9 +265,9 @@
                 font = "50px Verdana";
 
             var gradient=ctx.createLinearGradient(0, 0, w, 0);
-            gradient.addColorStop("0","magenta");
-            gradient.addColorStop("0.5","blue");
-            gradient.addColorStop("1.0","red");
+            gradient.addColorStop("0","green");
+            gradient.addColorStop("0.5","red");
+            gradient.addColorStop("1.0","blue");
 
             ctx.font = font;
             ctx.textAlign = "center";
@@ -279,19 +284,6 @@
 
         function backup_draw_text(w, h, str, font) {
             __draw_text(vnc_canvas_backup, w, h, str, font);
-        }
-
-        function restore_canvas() {
-            //console.info("restore canvas");
-
-            var w = vnc_canvas_backup.width;
-            var h = vnc_canvas_backup.height;
-
-            var ctx = vnc_canvas_backup.getContext('2d');
-            if (canvas_imgdata !== '')
-                ctx.putImageData(canvas_imgdata, 0, 0);
-
-            backup_draw_text(w, h, "Fast Forwarding, wait for a moment ...")
         }
 
 	function __resume() {
@@ -562,14 +554,20 @@
 
 	function __screenSize() {
 	    if (screen_width_input === 0)
-		screen_width = window.innerWidth;
-	    else if (screen_width_input > window.innerWidth)
-		screen_width = window.innerWidth;
+		screen_width = window.innerWidth - 50;
+	    else if (screen_width_input > window.innerWidth - 50)
+		screen_width = window.innerWidth - 50;
 
 	    if (screen_width > 0 && screen_height === 0)
 		screen_height = Math.round(screen_width / screen_ratio);
 	    if (screen_height > 0 && screen_width === 0)
 		screen_width = Math.round(screen_height * screen_ratio);
+
+            if (rfb && rfb._display) {
+                rfb._display.autoscale(screen_width, screen_height, 1);
+                vnc_canvas_backup.style.width = vnc_canvas.style.width;
+                vnc_canvas_backup.style.height = vnc_canvas.style.height;
+            }
 	}
 
         window.onscriptsload = function () {
