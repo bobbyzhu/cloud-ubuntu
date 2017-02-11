@@ -239,6 +239,7 @@
 
         function backup_canvas() {
             //console.info("backup canvas");
+            update_screensize();
 
             var w = vnc_canvas.width;
             var h = vnc_canvas.height;
@@ -488,7 +489,7 @@
 	}
 
 	window.onresize = function() {
-	    __screenSize();
+	    update_screensize();
 	}
 
         window.onblur = function() {
@@ -552,7 +553,7 @@
 	    __resume();
 	}
 
-	function __screenSize() {
+	function update_screensize() {
 	    if (screen_width_input === 0)
 		screen_width = window.innerWidth - 50;
 	    else if (screen_width_input > window.innerWidth - 50)
@@ -564,7 +565,8 @@
 		screen_width = Math.round(screen_height * screen_ratio);
 
             if (rfb && rfb._display) {
-                rfb._display.autoscale(screen_width, screen_height, 1);
+                if (screen_width > 0 || screen_height > 0)
+                    rfb._display.autoscale(screen_width, screen_height, 1);
                 vnc_canvas_backup.style.width = vnc_canvas.style.width;
                 vnc_canvas_backup.style.height = vnc_canvas.style.height;
             }
@@ -582,7 +584,7 @@
 
 	    screen_width_input = screen_width;
 
-	    __screenSize();
+	    update_screensize();
 
             iters.value = iterations;
             jumpto.textContent = skipframes;
