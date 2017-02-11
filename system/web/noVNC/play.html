@@ -1,99 +1,117 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Tiny noVNC Player</title>
+	<title>Tiny noVNC Player</title>
 
 	<style type="text/css">
 	    body { background-color:#eee; font-size:12px; font-family:'Tahoma', 'Verdana'; text-align:center }
 	    body,a,input,span { vertical-align:middle }
-	    div { white-space:nowrap; overflow-x:auto }
+	    div { white-space:nowrap; overflow-x:auto; }
 
 	    div a { text-decoration: none; outline: none; }
 	    h1 a { text-decoration: none; outline: none; color:#000 }
 
-            #VNC_canvas { display: inline-block; }
-            #VNC_canvas_backup { display: none; }
+	    #VNC_records { display: none; }
+	    iframe { text-align: center; width: 98%; height: 180px; }
 
-	    #minusButton,#plusButton,#beginButton,#endButton {
-		color: #aaa; display: none; margin-left: 5px; margin-right: 5px;
-	    }
+	    #VNC_canvas { display: inline-block; }
+	    #VNC_canvas_backup { display: none; }
 
 	    #session { font-size: 115%; vertical-align: top }
-	    #iterations { width:30px; }
+	    #iterations { width: 30px; }
 
-	    #startButton { width:80px; margin-right: 5px; display: none; }
-	    #trackBar { width: 300px; display:none; margin-left: 5px; margin-right: 5px; }
-	    #messages { font-size:9; margin: 0 auto; display:none }
+	    #playBar { display: none; }
+	    #startBtn { width: 80px; margin-left: 2px; margin-right: 2px }
+	    #trackBar { width: 100%; margin-left: 2px; margin-right: 2px; }
+	    #minusBtn,#plusBtn,#beginBtn,#endBtn {
+		color: #aaa; display: none; margin-left: 2px; margin-right: 2px;
+		width: 30px;
+	    }
+
+	    #infoBar { display: none; }
+	    #messages { font-size: 9; margin: 0 auto; }
 	</style>
     </head>
     <body>
 
 	<h1><a href="http://tinylab.org" target="_blank" title="Subproject of Cloud Lab (github.com/tinyclub/cloud-lab), based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
 
-        <div id="VNC_control">
-	    <div><a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span>&nbsp;&nbsp;<a onclick="show_records();">#sessions</a></div><br>
-            <div id="VNC_records" style="display: none;">
-                <iframe src="/recordings/records.html" width="560" height="360" style="text-align: center"></iframe>
-            </div><br>
+	<div id="VNC_control">
+	  <br>
+	  <div id="VNC_control_status">
 
-	    <input id='startButton' type='button' value='=>' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
+	     <a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span>&nbsp;&nbsp;<a href="#" onclick="show_records();">#sessions</a>
 
-	    <input id="beginButton" type='button' value='<<' onclick="track_click('begin');" title="Ctrl/Shift/Alt + Up, Goto the Begin">
-	    <input id="minusButton" type='button' value='<' onclick="track_click('minus');" title="Ctrl/Shift/Alt + Left, Backfoward frames">
+	  </div><br>
+
+	  <div id="VNC_records">
+		<iframe src="/recordings/records.html"></iframe>
+	  </div><br>
+
+	  <div id="infoBar">
+	      &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
+	      &nbsp; <a>Realtime: </a><input type='radio' id='mode2' name='mode' checked>
+	      &nbsp; <a>Iterations: </a><input id='iterations' onchange='iters_update()'>
+	      <br><br>
+	      <textarea id="messages" cols=80 rows=10></textarea>
+	      <br><br>
+	  </div>
+
+	  <div id="playBar">
+
+	    <input id='startBtn' type='button' value='=>' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
+
+	    <input id="beginBtn" type='button' value='<<' onclick="track_click('begin');" title="Ctrl/Shift/Alt + Up, Goto the Begin">
+	    <input id="minusBtn" type='button' value='<' onclick="track_click('minus');" title="Ctrl/Shift/Alt + Left, Backfoward frames">
 
 	    <input id="trackBar" type="range" min="0" max="10" step="1" value="0" title="Drag or Click to the target frame" ontouchstart='track_stop();' onmousedown='track_stop();' ontouchmove='track_move();' onmousemove='track_move();' ontouchend='track_start();' onmouseup='track_start();' />
 
-	    <input id="plusButton" type='button' value='>' onclick="track_click('plus');" title="Ctrl/Shift/Alt + Right, Fastforward 10 frames">
-	    <input id="endButton" type='button' value='>>' onclick="track_click('end');" title="Ctrl/Shift/Alt + Down, Goto the End"><br>
+	    <input id="plusBtn" type='button' value='>' onclick="track_click('plus');" title="Ctrl/Shift/Alt + Right, Fastforward 10 frames">
+	    <input id="endBtn" type='button' value='>>' onclick="track_click('end');" title="Ctrl/Shift/Alt + Down, Goto the End">
 
-	    <div id='buttons' style="display: none;"><br>
-	    &nbsp; <a>Fullspeed: </a><input type='radio' id='mode1' name='mode' onclick='mode1_checked();'>
-	    &nbsp; <a>Realtime: </a><input type='radio' id='mode2' name='mode' checked>
-	    &nbsp; <a>Iterations: </a><input id='iterations' onchange='iters_update()'>
-	    <br><br></div>
+	  </div>
 
-            <textarea id="messages" cols=80 rows=10></textarea><br><br>
-        </div>
+	</div>
 
-        <div id="VNC_screen">
-            <canvas id="VNC_canvas" width="100%" height="20px">
-                Canvas not supported.
-            </canvas>
-            <canvas id="VNC_canvas_backup" width="100%" height="20px">
-                Canvas not supported.
-            </canvas>
-            <div id="VNC_status_bar" class="VNC_status_bar">
-                <table border=0 width=100%><tr>
-                    <td><div id="VNC_status">Loading</div></td>
-                </tr></table>
-            </div>
-        </div>
+	<div id="VNC_screen">
+	    <canvas id="VNC_canvas" width="100%" height="20px">
+		Canvas not supported.
+	    </canvas>
+	    <canvas id="VNC_canvas_backup" width="100%" height="20px">
+		Canvas not supported.
+	    </canvas>
+	    <div id="VNC_status_bar" class="VNC_status_bar">
+		<table border=0 width=100%><tr>
+		    <td><div id="VNC_status">Loading</div></td>
+		</tr></table>
+	    </div>
+	</div>
     </body>
 
     <!--
     <script type='text/javascript'
-        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
+	src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
     -->
 
     <script type="text/javascript">
-        var INCLUDE_URI= "./";
-        //var INCLUDE_URI= "http://example.com/";
+	var INCLUDE_URI= "./";
+	//var INCLUDE_URI= "http://example.com/";
     </script>
     <script src="./core/util.js"></script>
     <script src="./app/webutil.js"></script>
 
     <script>
-        // skip drawing if (skipframes - frame_idx) is big
-        // draw a text to tell users wait instead.
-        var frames_delta = 200;
+	// skip drawing if (skipframes - frame_idx) is big
+	// draw a text to tell users wait instead.
+	var frames_delta = 200;
 	// play Stats
-        var playStats = {
+	var playStats = {
 	    INIT: 0,
 	    LOADING: 1,
 	    RUNNING: 2,
 	    STOPPED: 3,
 	    FINISH: 4,
-        };
+	};
 	var trackBarStats = {
 	    INIT: 0,
 	    DOWN: 1,
@@ -103,57 +121,68 @@
 	var track_bar_stats = trackBarStats.INIT;
 	var prev_track_value;
 
-        var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon, canvas_imgdata;
+	var fname, start_time, play_stats, frame_idx_max, totalframes, skipframes, messageon, canvas_imgdata;
 	var screen_width_input, screen_width, screen_height, screen_ratio;
-	var track_bar = document.getElementById('trackBar');
-	var cell = document.getElementById('messages');
+
+	var vnc_canvas = document.getElementById('VNC_canvas');
+	var vnc_canvas_backup = document.getElementById('VNC_canvas_backup');
+
+	var vnc_ctr = document.getElementById('VNC_control');
+	var vnc_ctr_status = document.getElementById('VNC_control_status');
 	var iter = document.getElementById('iteration');
 	var fidx = document.getElementById('frame_idx');
 	var session = document.getElementById('session');
-	var vnc_status = document.getElementById('VNC_status');
-	var vnc_canvas = document.getElementById('VNC_canvas');
-	var vnc_canvas_backup = document.getElementById('VNC_canvas_backup');
+
 	var vnc_records = document.getElementById('VNC_records');
-	var start_btn = document.getElementById('startButton');
-	var begin_btn = document.getElementById('beginButton');
-	var end_btn = document.getElementById('endButton');
-	var plus_btn = document.getElementById('plusButton');
-	var minus_btn = document.getElementById('minusButton');
+	var vnc_status = document.getElementById('VNC_status');
+
+	var play_bar = document.getElementById('playBar');
+	var track_bar = document.getElementById('trackBar');
+	var start_btn = document.getElementById('startBtn');
+	var begin_btn = document.getElementById('beginBtn');
+	var end_btn = document.getElementById('endBtn');
+	var plus_btn = document.getElementById('plusBtn');
+	var minus_btn = document.getElementById('minusBtn');
+
+	var info_bar = document.getElementById('infoBar');
+	var cell = document.getElementById('messages');
+
 	var jumpto = document.getElementById('skipframes');
 	var size = document.getElementById('size');
 	var loop = document.getElementById('loop');
 	var iters = document.getElementById('iterations');
+
 	var mode1 = document.getElementById('mode1');
 	var mode2 = document.getElementById('mode2');
 
-        play_stats = playStats.INIT;
+	play_stats = playStats.INIT;
 	prev_track_value = 0;
 	frame_idx_max = 0;
 	totalframes = 0;
-        canvas_imgdata = '';
+	canvas_imgdata = '';
 
-        function show_records() {
-            console.info("vnc records display " + vnc_records.style.display);
-            if (vnc_records.style.display === "none")
-                vnc_records.style.display = "inline-block";
-            else
-                vnc_records.style.display = "none";
-        }
+	function show_records() {
+	    console.info("vnc records display " + vnc_records.style.display);
+	    if (vnc_records.style.display === "inline-block")
+		vnc_records.style.display = "none";
+	    else
+		vnc_records.style.display = "inline-block";
+	}
 
 	function iters_update() {
 	    iterations = Number(iters.value);
 	    loop.textContent = iterations;
 	}
 
-        function message(str) {
+	function message(str) {
 	    if (messageon) {
-                console.log(str);
-                cell.textContent += str + "\n";
-                cell.scrollTop = cell.scrollHeight;
+		console.log(str);
+		cell.textContent += str + "\n";
+		cell.scrollTop = cell.scrollHeight;
 	    }
-        }
+	}
 
-        function ___updatestats(iteration, frame_idx) {
+	function ___updatestats(iteration, frame_idx) {
 	    iter.textContent = iteration;
 	    if (fname) {
 		var tmp = frame_idx + 1;
@@ -164,65 +193,65 @@
 
 	    if ((frame_idx > skipframes) && ___running())
 		track_bar.value = frame_idx;
-        }
+	}
 
 	function ___running() {
 	    return (play_stats === playStats.RUNNING)
 	}
 
-        fname = WebUtil.getQueryVar('data', null);
-        if (fname) {
+	fname = WebUtil.getQueryVar('data', null);
+	if (fname) {
 	    var tmp = fname.replace(/.*\//,"");
-            message("Loading " + tmp);
+	    message("Loading " + tmp);
 
 	    session.textContent = "#"+ tmp;
 	    vnc_status.textContent = "Loading";
 
-            // Load supporting scripts
-            WebUtil.load_scripts({
-                'core': ["base64.js", "websock.js", "des.js", "input/keysym.js",
-                         "input/keysymdef.js", "input/xtscancodes.js", "input/util.js",
-                         "input/devices.js", "display.js", "rfb.js", "inflator.js"],
-                'tests': ["playback.js"],
-                'recordings': [fname]});
+	    // Load supporting scripts
+	    WebUtil.load_scripts({
+		'core': ["base64.js", "websock.js", "des.js", "input/keysym.js",
+			 "input/keysymdef.js", "input/xtscancodes.js", "input/util.js",
+			 "input/devices.js", "display.js", "rfb.js", "inflator.js"],
+		'tests': ["playback.js"],
+		'recordings': [fname]});
 
-            play_stats = playStats.LOADING;
+	    play_stats = playStats.LOADING;
 	    fname = tmp;
-        } else {
-            vnc_status.textContent = 'Must specify data=FOO in query string.';
-            vnc_records.style.display = "inline-block";
-            message("Must specify data=FOO in query string.");
-        }
+	} else {
+	    vnc_status.textContent = 'Must specify data=FOO in query string.';
+	    vnc_records.style.display = "inline-block";
+	    message("Must specify data=FOO in query string.");
+	}
 
-        disconnected = function (rfb, reason) {
-            if (reason) {
-                message("noVNC sent '" + state + "' state during iteration " + iteration + " frame " + frame_idx);
-                test_state = 'failed';
-            }
-        }
+	disconnected = function (rfb, reason) {
+	    if (reason) {
+		message("noVNC sent '" + state + "' state during iteration " + iteration + " frame " + frame_idx);
+		test_state = 'failed';
+	    }
+	}
 
-        notification = function (rfb, mesg, level, options) {
-            vnc_status.textContent = mesg;
-        }
+	notification = function (rfb, mesg, level, options) {
+	    vnc_status.textContent = mesg;
+	}
 
-        function __start() {
+	function __start() {
 	    start_btn.value = "||";
 	    vnc_status.textContent = "Running";
-            message("Start play the " + skipframes + " Frame");
+	    message("Start play the " + skipframes + " Frame");
 
-            iteration = 0;
-            start_time = (new Date()).getTime();
-            //recv_message = rfb.testMode(send_array, VNC_frame_encoding);
+	    iteration = 0;
+	    start_time = (new Date()).getTime();
+	    //recv_message = rfb.testMode(send_array, VNC_frame_encoding);
 
-            play_stats = playStats.RUNNING;
+	    play_stats = playStats.RUNNING;
 
-            ___speedup();
+	    ___speedup();
 
-            next_iteration();
-        }
+	    next_iteration();
+	}
 
 	function __stop() {
-            backup_canvas();
+	    backup_canvas();
 	    play_stats = playStats.STOPPED;
 
 	    start_btn.value = '=>';
@@ -231,61 +260,61 @@
 	}
 
 	function ___stop() {
-            mode = 'realtime';
-            ___updatestats(iteration, frame_idx);
+	    mode = 'realtime';
+	    ___updatestats(iteration, frame_idx);
 	    __stop();
 	    __resume();
 	}
 
-        function backup_canvas() {
-            //console.info("backup canvas");
-            update_screensize();
+	function backup_canvas() {
+	    //console.info("backup canvas");
+	    update_screensize();
 
-            var w = vnc_canvas.width;
-            var h = vnc_canvas.height;
+	    var w = vnc_canvas.width;
+	    var h = vnc_canvas.height;
 
-            vnc_canvas_backup.width = w;
-            vnc_canvas_backup.height = h;
+	    vnc_canvas_backup.width = w;
+	    vnc_canvas_backup.height = h;
 
-            canvas_imgdata = vnc_canvas.getContext('2d').getImageData(0, 0, w, h);
+	    canvas_imgdata = vnc_canvas.getContext('2d').getImageData(0, 0, w, h);
 
-            var ctx = vnc_canvas_backup.getContext('2d');
-            if (canvas_imgdata !== '')
-                ctx.putImageData(canvas_imgdata, 0, 0);
+	    var ctx = vnc_canvas_backup.getContext('2d');
+	    if (canvas_imgdata !== '')
+		ctx.putImageData(canvas_imgdata, 0, 0);
 
-            backup_draw_text(w, h, "Fast Forwarding ...")
-        }
+	    backup_draw_text(w, h, "Fast Forwarding ...")
+	}
 
-        function __draw_text(canvas, w, h, str, font) {
-            if (canvas === vnc_canvas_backup)
-                ctx = vnc_canvas_backup.getContext('2d');
-            else
-                ctx = rfb._display.get_context();
+	function __draw_text(canvas, w, h, str, font) {
+	    if (canvas === vnc_canvas_backup)
+		ctx = vnc_canvas_backup.getContext('2d');
+	    else
+		ctx = rfb._display.get_context();
 
-            if (!font)
-                font = "50px Verdana";
+	    if (!font)
+		font = "50px Verdana";
 
-            var gradient=ctx.createLinearGradient(0, 0, w, 0);
-            gradient.addColorStop("0","green");
-            gradient.addColorStop("0.5","red");
-            gradient.addColorStop("1.0","blue");
+	    var gradient=ctx.createLinearGradient(0, 0, w, 0);
+	    gradient.addColorStop("0","green");
+	    gradient.addColorStop("0.5","red");
+	    gradient.addColorStop("1.0","blue");
 
-            ctx.font = font;
-            ctx.textAlign = "center";
-            ctx.fillStyle = gradient;
+	    ctx.font = font;
+	    ctx.textAlign = "center";
+	    ctx.fillStyle = gradient;
 
-            var x = parseInt(w / 2);
-            var y = parseInt(h / 4);
-            ctx.fillText(str, x, y);
-        }
+	    var x = parseInt(w / 2);
+	    var y = parseInt(h / 4);
+	    ctx.fillText(str, x, y);
+	}
 
-        function draw_text(w, h, str, font) {
-            __draw_text(vnc_canvas, w, h, str, font);
-        }
+	function draw_text(w, h, str, font) {
+	    __draw_text(vnc_canvas, w, h, str, font);
+	}
 
-        function backup_draw_text(w, h, str, font) {
-            __draw_text(vnc_canvas_backup, w, h, str, font);
-        }
+	function backup_draw_text(w, h, str, font) {
+	    __draw_text(vnc_canvas_backup, w, h, str, font);
+	}
 
 	function __resume() {
 	    start_btn.disabled = false;
@@ -297,42 +326,41 @@
 
 	    skipframes = 0;
 	    prev_track_value = frame_idx_max;
-            vnc_canvas_backup.style.display = 'none';
-            vnc_canvas.style.display = 'inline-block';
-            vnc_status.textContent = "Continued";
+	    vnc_canvas_backup.style.display = 'none';
+	    vnc_canvas.style.display = 'inline-block';
 	}
 
-        function ___speedup() {
-            if (!(skipframes > frame_idx))
-                return;
+	function ___speedup() {
+	    if (!(skipframes > frame_idx))
+		return;
 
-            mode = 'fullspeed';
+	    mode = 'fullspeed';
 
-            if (skipframes - frame_idx > frames_delta) {
-                vnc_canvas.style.display = 'none';
-                vnc_canvas_backup.style.display = 'inline-block';
-                vnc_status.textContent = "Fast Continued...";
-            }
+	    if (skipframes - frame_idx > frames_delta) {
+		vnc_canvas.style.display = 'none';
+		vnc_canvas_backup.style.display = 'inline-block';
+		vnc_status.textContent = "Fast Continued...";
+	    }
 
-            start_btn.disabled = true;
-            begin_btn.disabled = true;
-            end_btn.disabled = true;
-            plus_btn.disabled = true;
-            minus_btn.disabled = true;
-            track_bar.disabled = true;
-        }
+	    start_btn.disabled = true;
+	    begin_btn.disabled = true;
+	    end_btn.disabled = true;
+	    plus_btn.disabled = true;
+	    minus_btn.disabled = true;
+	    track_bar.disabled = true;
+	}
 
 	function __continue() {
 	    start_btn.value = "||";
 	    vnc_status.textContent = "Continued";
 
-            ___speedup();
+	    ___speedup();
 
 	    if (mode === 'fullspeed') {
 		window.setImmediate(do_packet);
 	    } else {
 		setTimeout(do_packet, delay);
-	        istart_time = (new Date()).getTime() - toffset;
+		istart_time = (new Date()).getTime() - toffset;
 	    }
 
 	    play_stats = playStats.RUNNING;
@@ -340,15 +368,16 @@
 	}
 
 	function start() {
-            if (mode1.checked) {
-                message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
-                mode = 'fullspeed';
-            } else {
-                message("Starting realtime playback [" + iterations + " iteration(s)]");
-                mode = 'realtime';
-            }
+	    if (mode1.checked) {
+		message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
+		mode = 'fullspeed';
+	    } else {
+		message("Starting realtime playback [" + iterations + " iteration(s)]");
+		mode = 'realtime';
+	    }
 
 	    if (play_stats != playStats.RUNNING) {
+		vnc_status.style.display = 'none';
 		if (play_stats === playStats.STOPPED)
 		    __continue();
 		else
@@ -382,13 +411,13 @@
 
 	    if ((track_bar_stats === trackBarStats.DOWN) || (track_bar_stats === trackBarStats.MOVE)) {
 		if (!___running()) {
-	            skipframes = Number(track_bar.value) + 1;
+		    skipframes = Number(track_bar.value) + 1;
 		    if (skipframes > frame_idx_max)
-	                jumpto.textContent = totalframes;
+			jumpto.textContent = totalframes;
 		    else
-	                jumpto.textContent = Number(skipframes) + 1;
+			jumpto.textContent = Number(skipframes) + 1;
 		}
-	        track_bar_stats = trackBarStats.MOVE;
+		track_bar_stats = trackBarStats.MOVE;
 	    }
 	}
 
@@ -445,29 +474,29 @@
 		    }
 
 		    if (tmp > 2500)
-		        tmp = parseInt(tmp / 2);
+			tmp = parseInt(tmp / 2);
 		    else if (tmp > 1500)
-		        tmp = parseInt(tmp * 2 / 3);
+			tmp = parseInt(tmp * 2 / 3);
 		    else if (tmp > 1000)
-		        tmp = tmp - 500;
+			tmp = tmp - 500;
 		    else if (tmp > 500)
-		        tmp = tmp - 200;
+			tmp = tmp - 200;
 		    else if (tmp > 100)
-		        tmp = tmp - 100;
+			tmp = tmp - 100;
 		    else if (tmp > 50)
-		        tmp = tmp - 50;
+			tmp = tmp - 50;
 		    else if (tmp > 20)
-		        tmp = tmp - 20;
+			tmp = tmp - 20;
 		    else
-		        tmp = tmp - 10;
+			tmp = tmp - 10;
 
 		    while (prev_track_value <= tmp)
 			tmp = tmp - 10;
 
 		    if (tmp > 0)
-		        track_bar.value = tmp;
+			track_bar.value = tmp;
 		    else
-		        track_bar.value = 0;
+			track_bar.value = 0;
 		    minus_btn.disabled = true;
 		    break;
 		case 'plus':
@@ -492,10 +521,10 @@
 	    update_screensize();
 	}
 
-        window.onblur = function() {
-            if (!(skipframes > frame_idx))
-                __stop();
-        }
+	window.onblur = function() {
+	    if (!(skipframes > frame_idx))
+		__stop();
+	}
 
 	document.onkeydown = function(e) {
 	    if (track_bar.disabled || (mode === "fullspeed"))
@@ -528,22 +557,23 @@
 	    }
 	}
 
-        function finish() {
-            // Finished with all iterations
-            var total_time, end_time = (new Date()).getTime();
-            total_time = end_time - start_time;
+	function finish() {
+	    // Finished with all iterations
+	    var total_time, end_time = (new Date()).getTime();
+	    total_time = end_time - start_time;
 
-            iter_time = parseInt(total_time / iterations, 10);
-            message(iterations + " iterations took " + total_time + "ms, " +
-                    iter_time + "ms per iteration");
-            // Shut-off event interception
-            rfb.get_mouse().ungrab();
-            rfb.get_keyboard().ungrab();
+	    iter_time = parseInt(total_time / iterations, 10);
+	    message(iterations + " iterations took " + total_time + "ms, " +
+		    iter_time + "ms per iteration");
+	    // Shut-off event interception
+	    rfb.get_mouse().ungrab();
+	    rfb.get_keyboard().ungrab();
 
-            play_stats = playStats.FINISH;
-            start_btn.value = "=>";
-            vnc_status.textContent = "Finished";
-        }
+	    play_stats = playStats.FINISH;
+	    start_btn.value = "=>";
+	    vnc_status.textContent = "Finished";
+	    vnc_status.style.display = 'inline-block';
+	}
 
 	function ___finish() {
 	    if ((mode == 'fullspeed') && (skipframes > 0))
@@ -554,29 +584,44 @@
 	}
 
 	function update_screensize() {
-	    if (screen_width_input === 0)
-		screen_width = window.innerWidth - 50;
-	    else if (screen_width_input > window.innerWidth - 50)
-		screen_width = window.innerWidth - 50;
+	    var target_width = window.innerWidth - 35;
+
+	    if (screen_width_input <= 0)
+		screen_width = target_width;
+	    else if (screen_width_input > target_width)
+		screen_width = target_width;
 
 	    if (screen_width > 0 && screen_height === 0)
 		screen_height = Math.round(screen_width / screen_ratio);
 	    if (screen_height > 0 && screen_width === 0)
 		screen_width = Math.round(screen_height * screen_ratio);
 
-            if (rfb && rfb._display) {
-                if (screen_width > 0 || screen_height > 0)
-                    rfb._display.autoscale(screen_width, screen_height, 1);
-                vnc_canvas_backup.style.width = vnc_canvas.style.width;
-                vnc_canvas_backup.style.height = vnc_canvas.style.height;
-            }
+	    if (rfb && rfb._display) {
+		rfb._display.autoscale(screen_width, screen_height, 1);
+
+                var w = vnc_canvas.style.width;
+                var width = parseInt(w);
+                var track_bar_width = width - 35 - 80 - 120;
+                if (track_bar_width < 50)
+                    return;
+
+		track_bar.style.width = track_bar_width + "px";
+		play_bar.style.display = 'inline-block';
+
+                var h = vnc_canvas.style.height;
+
+		vnc_canvas_backup.style.width = w;
+		vnc_canvas_backup.style.height = h;
+
+		vnc_records.style.width = w;
+	    }
 	}
 
-        window.onscriptsload = function () {
-            iterations = WebUtil.getQueryVar('iterations', 1);
-            skipframes = WebUtil.getQueryVar('skipframes', 0);
-            frames_delta = WebUtil.getQueryVar('delta', frames_delta);
-            messageon = WebUtil.getQueryVar('message', 0);
+	window.onscriptsload = function () {
+	    iterations = WebUtil.getQueryVar('iterations', 1);
+	    skipframes = WebUtil.getQueryVar('skipframes', 0);
+	    frames_delta = WebUtil.getQueryVar('delta', frames_delta);
+	    messageon = WebUtil.getQueryVar('message', 0);
 
 	    screen_width = WebUtil.getQueryVar('width', 0);
 	    screen_height = WebUtil.getQueryVar('height', 0);
@@ -586,45 +631,44 @@
 
 	    update_screensize();
 
-            iters.value = iterations;
-            jumpto.textContent = skipframes;
+	    iters.value = iterations;
+	    jumpto.textContent = skipframes;
 	    loop.textContent = iterations;
-            mode = WebUtil.getQueryVar('mode', 3);
+	    mode = WebUtil.getQueryVar('mode', 3);
 
-            if (mode === 'fullspeed') {
-                mode1.checked = true;
-            } else {
-                mode2.checked = true;
-            }
-            if (messageon) {
-		buttons.style.display = 'block';
-                cell.style.display = 'block';
-            }
-            if (fname) {
-                message("VNC_frame_data.length: " + VNC_frame_data.length);
+	    if (mode === 'fullspeed') {
+		mode1.checked = true;
+	    } else {
+		mode2.checked = true;
+	    }
+	    if (messageon)
+		info_bar.style.display = 'block';
+
+	    if (fname) {
+		message("VNC_frame_data.length: " + VNC_frame_data.length);
 		if (typeof(VNC_frame_title) !== "undefined")
-                    session.title = VNC_frame_title;
+		    session.title = VNC_frame_title;
 		frame_idx_max = VNC_frame_data.length - 1;
 
-                track_bar.max = frame_idx_max;
+		track_bar.max = frame_idx_max;
 		prev_track_value = frame_idx_max;
 		totalframes = VNC_frame_data.length;
-	        size.textContent = VNC_frame_data.length;
+		size.textContent = VNC_frame_data.length;
 
-                track_bar.style.display = "inline-block";
+		track_bar.style.display = "inline-block";
 
-	        start_btn.style.display = 'inline-block';
-	        begin_btn.style.display = 'inline-block';
-	        end_btn.style.display = 'inline-block';
-	        plus_btn.style.display = 'inline-block';
-	        minus_btn.style.display = 'inline-block';
+		start_btn.style.display = 'inline-block';
+		begin_btn.style.display = 'inline-block';
+		end_btn.style.display = 'inline-block';
+		plus_btn.style.display = 'inline-block';
+		minus_btn.style.display = 'inline-block';
 
-                // Play immediately after load the data
-                start_btn.disabled = false;
-            }
-            vnc_status.textContent = "Loaded";
+		// Play immediately after load the data
+		start_btn.disabled = false;
+	    }
+	    vnc_status.textContent = "Loaded";
 
-            start();
-        }
+	    start();
+	}
     </script>
 </html>

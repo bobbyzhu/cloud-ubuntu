@@ -220,8 +220,8 @@ do_packet = function () {
         }
     }
     bytes_processed += u8.length;
-    //rfb._display.set_scale(0.6);
     rfb._sock._recv_message({'data' : u8});
+    update_screensize();
     frame_idx += 1;
 
     queue_next_packet();
