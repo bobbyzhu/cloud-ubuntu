@@ -20,7 +20,7 @@
 	    #session { font-size: 115%; vertical-align: top }
 	    #iterations { width: 30px; }
 
-	    #playBar { display: none; }
+	    #VNC_playBar { display: none; }
 	    #startBtn { width: 80px; margin-left: 2px; margin-right: 2px }
 	    #trackBar { width: 100%; margin-left: 2px; margin-right: 2px; }
 	    #minusBtn,#plusBtn,#beginBtn,#endBtn {
@@ -34,13 +34,20 @@
     </head>
     <body>
 
-	<h1><a href="http://tinylab.org" target="_blank" title="Subproject of Cloud Lab (github.com/tinyclub/cloud-lab), based on noVNC/tests/vnc_plaback.html and improved by TinyLab.org">Tiny noVNC Player</a></h1>
+	<h1 id="VNC_title"><a href="http://tinylab.org" target="_blank" title="Powered by TinyLab.org">Tiny noVNC Player</a></h1>
 
 	<div id="VNC_control">
 	  <br>
 	  <div id="VNC_control_status">
 
-	     <a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;<span id="loop" title="Total iterations"></span><a> . </a><span id="iteration" title="Current iteration"></span><a> . </a><span id="size" title="Total frames"></span><a> . </a><span id="skipframes" title="Frames to skip"></span><a> . </a><span id="frame_idx" title="Current frame and percentage"></span>&nbsp;&nbsp;<a href="#" onclick="show_records();">#sessions</a>
+	     <a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;
+             <span id="loop" title="Total iterations"></span><a> . </a>
+             <span id="iteration" title="Current iteration"></span><a> . </a>
+             <span id="size" title="Total frames"></span><a> . </a>
+             <span id="skipframes" title="Frames to skip"></span><a> . </a>
+             <span id="frame_idx" title="Current frame and percentage"></span>
+             &nbsp;&nbsp;<a href="#" onclick="show_records();">#sessions</a>
+             &nbsp;<a href="#" onclick="full_screen();">#fullscreen</a>
 
 	  </div><br>
 
@@ -56,8 +63,9 @@
 	      <textarea id="messages" cols=80 rows=10></textarea>
 	      <br><br>
 	  </div>
+	</div>
 
-	  <div id="playBar">
+	<div id="VNC_playBar">
 
 	    <input id='startBtn' type='button' value='=>' onclick="start();" title="Press Enter, Start/Stop/Continue" disabled>
 
@@ -69,9 +77,8 @@
 	    <input id="plusBtn" type='button' value='>' onclick="track_click('plus');" title="Ctrl/Shift/Alt + Right, Fastforward 10 frames">
 	    <input id="endBtn" type='button' value='>>' onclick="track_click('end');" title="Ctrl/Shift/Alt + Down, Goto the End">
 
-	  </div>
-
 	</div>
+
 
 	<div id="VNC_screen">
 	    <canvas id="VNC_canvas" width="100%" height="20px">
@@ -127,8 +134,10 @@
 	var vnc_canvas = document.getElementById('VNC_canvas');
 	var vnc_canvas_backup = document.getElementById('VNC_canvas_backup');
 
-	var vnc_ctr = document.getElementById('VNC_control');
-	var vnc_ctr_status = document.getElementById('VNC_control_status');
+	var vnc_title = document.getElementById('VNC_title');
+
+	var vnc_ctrl = document.getElementById('VNC_control');
+	var vnc_ctrl_status = document.getElementById('VNC_control_status');
 	var iter = document.getElementById('iteration');
 	var fidx = document.getElementById('frame_idx');
 	var session = document.getElementById('session');
@@ -136,7 +145,7 @@
 	var vnc_records = document.getElementById('VNC_records');
 	var vnc_status = document.getElementById('VNC_status');
 
-	var play_bar = document.getElementById('playBar');
+	var play_bar = document.getElementById('VNC_playBar');
 	var track_bar = document.getElementById('trackBar');
 	var start_btn = document.getElementById('startBtn');
 	var begin_btn = document.getElementById('beginBtn');
@@ -198,6 +207,27 @@
 	function ___running() {
 	    return (play_stats === playStats.RUNNING)
 	}
+
+        function show_others() {
+            vnc_title.style.display = 'block';
+            vnc_ctrl.style.display = 'block';
+        }
+
+        function full_screen() {
+            fullscreen = 1;
+            hide_others();
+        }
+
+        function hide_others() {
+            vnc_title.style.display = 'none';
+            vnc_ctrl.style.display = 'none';
+        }
+
+	fullscreen = WebUtil.getQueryVar('f', 0);
+        if (fullscreen === 0)
+	    fullscreen = WebUtil.getQueryVar('fullscreen', 0);
+        if (fullscreen)
+            hide_others();
 
 	fname = WebUtil.getQueryVar('data', null);
 	if (fname) {
@@ -378,6 +408,8 @@
 
 	    if (play_stats != playStats.RUNNING) {
 		vnc_status.style.display = 'none';
+                if (fullscreen)
+                    hide_others();
 		if (play_stats === playStats.STOPPED)
 		    __continue();
 		else
@@ -573,6 +605,7 @@
 	    start_btn.value = "=>";
 	    vnc_status.textContent = "Finished";
 	    vnc_status.style.display = 'inline-block';
+            show_others();
 	}
 
 	function ___finish() {
