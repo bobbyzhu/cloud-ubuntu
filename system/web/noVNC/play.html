@@ -303,7 +303,7 @@
 
 	function backup_canvas() {
 	    //console.info("backup canvas");
-            if (!(rfb && rfb._display && frame_idx > 10))
+            if (!(rfb && rfb._display))
                 return;
 
 	    update_screensize();
@@ -350,6 +350,19 @@
 	    //var y = parseInt(h / 6);
 	    var y = 100;
 	    ctx.fillText(str, x, y);
+
+            // draw author info
+            // TODO: get author info from recorded data
+	    ctx.font = "35px Verdana";
+	    ctx.textAlign = "left";
+	    ctx.fillStyle = "#fff";
+	    var x = parseInt(w / 4);
+	    var y = 200;
+	    ctx.fillText("Author: falcon <wuzhangjin@gmail.com>", x, y);
+	    var y = 250;
+	    ctx.fillText("Site:   泰晓科技 | http://tinylab.org", x, y);
+	    var y = 300;
+	    ctx.fillText("Wechat: lzufalcon", x, y);
 	}
 
 	function draw_text(str, font) {
