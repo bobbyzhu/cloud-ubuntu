@@ -40,7 +40,7 @@
 	  <br>
 	  <div id="VNC_control_status">
 
-	     <a href="#VNC_canvas"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;
+	     <a href="#VNC_playbar"><span id="session" title="Goto the session video"></span></a>&nbsp;&nbsp;
              <span id="loop" title="Total iterations"></span><a> . </a>
              <span id="iteration" title="Current iteration"></span><a> . </a>
              <span id="size" title="Total frames"></span><a> . </a>
@@ -319,10 +319,10 @@
 
         function restore_canvas(str) {
 	    var ctx = vnc_canvas_backup.getContext('2d');
-	    if (canvas_imgdata !== '')
+	    if (canvas_imgdata !== '') {
 		ctx.putImageData(canvas_imgdata, 0, 0);
-
-	    backup_draw_text(str)
+	        backup_draw_text(str)
+            }
 	}
 
 	function __draw_text(canvas, str, font) {
@@ -347,7 +347,8 @@
 	    ctx.fillStyle = gradient;
 
 	    var x = parseInt(w / 2);
-	    var y = parseInt(h / 5);
+	    //var y = parseInt(h / 6);
+	    var y = 100;
 	    ctx.fillText(str, x, y);
 	}
 
