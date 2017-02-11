@@ -118,7 +118,7 @@ next_iteration = function () {
 };
 
 end_iteration = function () {
-    ___updatestats(iteration, frame_idx);
+    ___update_stats(iteration, frame_idx);
 
     if (rfb._display.pending()) {
         rfb._display.set_onFlush(function () {
@@ -136,7 +136,7 @@ end_iteration = function () {
 queue_next_packet = function () {
     var frame, foffset;
 
-    ___updatestats(iteration, frame_idx);
+    ___update_stats(iteration, frame_idx);
     if (test_state !== 'running') { return; }
 
     frame = VNC_frame_data[frame_idx];
@@ -144,7 +144,7 @@ queue_next_packet = function () {
         //console.info("Send frame " + frame_idx);
         frame_idx += 1;
         frame = VNC_frame_data[frame_idx];
-        ___updatestats(iteration, frame_idx);
+        ___update_stats(iteration, frame_idx);
     }
 
     if (frame === 'EOF') {

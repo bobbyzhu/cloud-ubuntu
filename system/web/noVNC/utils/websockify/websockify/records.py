@@ -103,7 +103,7 @@ class Records:
                 rec_size = round(rec_size / 1024.0, 1)
                 unit = "M"
         
-            play_url = "/play.html?f=1&data=" + rec
+            play_url = "/play.html?data=" + rec
             down_url = "/" + self.record_dir + rec
 
             bg = "even"
