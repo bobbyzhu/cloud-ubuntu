@@ -80,7 +80,7 @@
 	</div>
 
 
-	<div id="VNC_screen" onclick="start(1)" ontouchstart='track_stop(1)' ontouchmove='track_move(1)' ontouchend='track_start(1)'>
+	<div id="VNC_screen" ontouchstart='track_stop(1)' onmousedown='track_stop(1)' ontouchmove='track_move(1)' onmousemove='track_move(1)' ontouchend='track_start(1)' onmouseup='track_start(1)'>
 	    <canvas id="VNC_canvas" width="100%" height="20px">
 		Canvas not supported.
 	    </canvas>
@@ -441,7 +441,7 @@
 		mode = 'realtime';
 	    }
 
-	    if (play_stats != playStats.RUNNING) {
+	    if (play_stats !== playStats.RUNNING) {
 		vnc_status.style.display = 'none';
                 if (fullscreen)
                     hide_others();
@@ -474,9 +474,14 @@
             if (touch) {
                 var event = window.event;
 		event.preventDefault();
-                last_x = event.touches[0].clientX;
-                last_y = event.touches[0].clientY;
-                //console.log("x is " + last_x + " y is " + last_y);
+		if (event.touches) {
+                    last_x = event.touches[0].clientX;
+                    last_y = event.touches[0].clientY;
+		} else {
+		    last_x = event.clientX;
+		    last_y = event.clientY;
+		}
+		// console.log("x is " + last_x + " y is " + last_y);
             }
 	}
 
@@ -488,8 +493,13 @@
 		if (!___running()) {
 		    if (touch) {
 			var event = window.event;
-			var x = event.touches[0].clientX;
-			var y = event.touches[0].clientY;
+			if (event.touches) {
+			    var x = event.touches[0].clientX;
+			    var y = event.touches[0].clientY;
+			} else {
+			    var x = event.clientX;
+			    var y = event.clientY;
+			}
                         var offset = Math.round((x - last_x) * track_bar.max / parseInt(track_bar.style.width));
 			track_bar.value = Number(track_bar.value) + offset;
 			//console.log("x is " + x + " y is " + y);
