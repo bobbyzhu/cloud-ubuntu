@@ -169,6 +169,7 @@
 
 	play_stats = playStats.INIT;
 	prev_track_value = 0;
+	prev_play_stats = play_stats;
 	frame_idx_max = 0;
 	totalframes = 0;
 	canvas_imgdata = '';
@@ -354,6 +355,9 @@
 	    var y = 100;
 	    ctx.fillText(str, x, y);
 
+	    if (str !== "Finished.")
+		return;
+
             // draw author info
             // TODO: get author info from recorded data
 	    ctx.font = "35px Verdana";
@@ -427,11 +431,16 @@
 	    message("Continue play the " + frame_idx + " frame!");
 	}
 
-	function start(clean) {
+	function start(clean, prev_play_stats) {
 	    if (clean)
 		__resume();
 	    else
 		restore_canvas("Fast Forwarding ...");
+
+	    if (prev_play_stats)
+		stats = prev_play_stats;
+	    else
+		stats = play_stats;
 
 	    if (mode1.checked) {
 		message("Starting performance playback (fullspeed) [" + iterations + " iteration(s)]");
@@ -441,11 +450,11 @@
 		mode = 'realtime';
 	    }
 
-	    if (play_stats !== playStats.RUNNING) {
+	    if (stats !== playStats.RUNNING) {
 		vnc_status.style.display = 'none';
                 if (fullscreen)
                     hide_others();
-		if (play_stats === playStats.STOPPED)
+		if (stats === playStats.STOPPED)
 		    __continue();
 		else
 		    __start();
@@ -463,13 +472,10 @@
 	    if (track_bar.disabled)
 		return;
 
-	    start_btn.disabled = true;
 	    track_bar_stats = trackBarStats.DOWN;
-	    if (fname) {
-		if (frame_idx < frame_idx_max) {
-		    __stop();
-		}
-	    }
+	    prev_play_stats = play_stats;
+	    if (fname && (frame_idx < frame_idx_max) && ___running())
+		__stop();
 
             if (touch) {
                 var event = window.event;
@@ -483,6 +489,9 @@
 		}
 		// console.log("x is " + last_x + " y is " + last_y);
             }
+
+	    prev_track_value = Number(track_bar.value);
+	    // console.log("prev track value is " + prev_track_value);
 	}
 
 	function track_move(touch) {
@@ -490,8 +499,10 @@
 		return;
 
 	    if ((track_bar_stats === trackBarStats.DOWN) || (track_bar_stats === trackBarStats.MOVE)) {
-		if (!___running()) {
-		    if (touch) {
+		var moved = 0;
+		var offset = 0;
+
+		if (touch) {
 			var event = window.event;
 			if (event.touches) {
 			    var x = event.touches[0].clientX;
@@ -500,18 +511,33 @@
 			    var x = event.clientX;
 			    var y = event.clientY;
 			}
-                        var offset = Math.round((x - last_x) * track_bar.max / parseInt(track_bar.style.width));
-			track_bar.value = Number(track_bar.value) + offset;
-			//console.log("x is " + x + " y is " + y);
-			last_x = x;
-		    }
+			if (x != last_x) {
+			    moved = 1;
+                            offset = Math.round((x - last_x) * track_bar.max / parseInt(track_bar.style.width));
+			    // console.log("x is " + x + " y is " + y + " moved is " + moved);
+			    last_x = x;
+			}
+		}
+
+		if (prev_track_value !== Number(track_bar.value))
+		    moved = 1;
+
+		//console.log("cur track value is " + Number(track_bar.value));
+
+		if ((track_bar_stats !== trackBarStats.MOVE) && (moved)) {
+		    start_btn.disabled = true;
+		    track_bar_stats = trackBarStats.MOVE;
+		}
+
+		if (!___running()) {
+		    track_bar.value = Number(track_bar.value) + offset;
+
 		    skipframes = Number(track_bar.value) + 1;
 		    if (skipframes > frame_idx_max)
 			jumpto.textContent = totalframes;
 		    else
 			jumpto.textContent = Number(skipframes) + 1;
 		}
-		track_bar_stats = trackBarStats.MOVE;
 	    }
 	}
 
@@ -520,6 +546,14 @@
 		return;
 
 	    track_move();
+
+	    if (track_bar_stats !== trackBarStats.MOVE) {
+		track_bar_stats = trackBarStats.UP;
+
+		start(1, prev_play_stats);
+
+		return;
+	    }
 
 	    track_bar.disabled = true;
 	    track_bar_stats = trackBarStats.UP;
