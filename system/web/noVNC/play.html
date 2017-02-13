@@ -329,7 +329,7 @@
             }
 	}
 
-	function __draw_text(canvas, str, font) {
+	function __draw_text(canvas, str, font, align, style, y, x, transparent) {
 	    if (canvas === vnc_canvas_backup)
 		ctx = vnc_canvas_backup.getContext('2d');
 	    else
@@ -341,35 +341,38 @@
 	    if (!font)
 		font = "50px Verdana";
 
-	    var gradient=ctx.createLinearGradient(0, 0, w, 0);
-	    gradient.addColorStop("0","green");
-	    gradient.addColorStop("0.5","red");
-	    gradient.addColorStop("1.0","blue");
+	    if (!align)
+	        align = "center";
+
+	    if (!style) {
+		//var gradient=ctx.createLinearGradient(0, 0, w, 0);
+		//gradient.addColorStop("0","green");
+		//gradient.addColorStop("0.5","red");
+		//gradient.addColorStop("1.0","blue");
+		//style = gradient;
+		style = "#fff";
+	    }
+
+            if (!x)
+	        x = parseInt(w / 2);
+
+	    if (!y) {
+		//var y = parseInt(h / 6);
+		var y = 100;
+	    }
+
+	    if (!transparent)
+		transparent = 0.5;
+
+	    ctx.globalAlpha = transparent;
+	    ctx.fillStyle = "#000";
+	    ctx.fillRect(0, y/2, w, Math.round(parseInt(font) * 3 / 2));
 
 	    ctx.font = font;
-	    ctx.textAlign = "center";
-	    ctx.fillStyle = gradient;
-
-	    var x = parseInt(w / 2);
-	    //var y = parseInt(h / 6);
-	    var y = 100;
+	    ctx.textAlign = align;
+	    ctx.fillStyle = style;
+	    ctx.globalAlpha = 1;
 	    ctx.fillText(str, x, y);
-
-	    if (str !== "Finished.")
-		return;
-
-            // draw author info
-            // TODO: get author info from recorded data
-	    ctx.font = "35px Verdana";
-	    ctx.textAlign = "left";
-	    ctx.fillStyle = "#fff";
-	    var x = parseInt(w / 6);
-	    var y = 200;
-	    ctx.fillText("Author: falcon <wuzhangjin@gmail.com>", x, y);
-	    var y = 250;
-	    ctx.fillText("Site:   泰晓科技 | http://tinylab.org", x, y);
-	    var y = 300;
-	    ctx.fillText("Wechat: lzufalcon", x, y);
 	}
 
 	function draw_text(str, font) {
@@ -706,6 +709,7 @@
 
 	function __draw_finish() {
 	    restore_canvas("Finished.");
+	    __draw_text(vnc_canvas_backup, "by Falcon of TinyLab.org", "35px Verdana", "center", "#fff", 200);
 
 	    vnc_canvas.style.display = 'none';
 	    vnc_canvas_backup.style.display = 'inline-block';
